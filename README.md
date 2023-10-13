@@ -5,6 +5,85 @@ This is as an example on how teams can structure their project repositories. Tha
 This is forked from the code corresponding to the paper with minor updates relating to package versions.
 https://github.com/eschlaf2/CNN_Spectrogram_Algorithm
 
+## Troubleshooting
+
+You might get an error when you try to import `bcolz` because it assumes an older version of NumPy. 
+
+<details>
+  <summary>bcolz/np.float error</summary>
+  
+```python
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+File ~/CNN_Spectrogram_Algorithm/Demo-Training/demo_training_functions.py:4
+      2 sys.path.insert(1, '../')
+      3 import matplotlib.pyplot as plt
+----> 4 from fastai_v1.imports import *
+      5 from fastai_v1.transforms import *
+      6 from fastai_v1.conv_learner import *
+
+File ~/CNN_Spectrogram_Algorithm/Demo-Training/../fastai_v1/imports.py:5
+      3 import PIL, os, numpy as np, math, collections, threading, json, random, scipy, cv2
+      4     # Don't import bcolz - it's not maintained anymore
+----> 5 import bcolz
+      6 import pandas as pd, pickle, sys, itertools, string, sys, re, datetime, time, shutil, copy
+      7 import seaborn as sns, matplotlib
+
+File /projectnb/ecog/eds2/.conda/envs/cnn-specgram/lib/python3.8/site-packages/bcolz/__init__.py:81
+     76 from bcolz.carray_ext import (
+     77     carray, blosc_version, blosc_compressor_list,
+     78     _blosc_set_nthreads as blosc_set_nthreads,
+     79     _blosc_init, _blosc_destroy)
+     80 from bcolz.ctable import ctable
+---> 81 from bcolz.toplevel import (
+     82     print_versions, detect_number_of_cores, set_nthreads,
+     83     open, fromiter, arange, zeros, ones, fill,
+     84     iterblocks, cparams, walk)
+     85 from bcolz.chunked_eval import eval
+     86 from bcolz.defaults import defaults, defaults_ctx
+
+File /projectnb/ecog/eds2/.conda/envs/cnn-specgram/lib/python3.8/site-packages/bcolz/toplevel.py:214
+    210     obj.flush()
+    211     return obj
+--> 214 def fill(shape, dflt=None, dtype=np.float, **kwargs):
+    215     """fill(shape, dtype=float, dflt=None, **kwargs)
+    216 
+    217     Return a new carray or ctable object of given shape and type, filled with
+   (...)
+    242 
+    243     """
+    245     def fill_helper(obj, dtype=None, length=None):
+
+File /projectnb/ecog/eds2/.conda/envs/cnn-specgram/lib/python3.8/site-packages/numpy/__init__.py:305, in __getattr__(attr)
+    300     warnings.warn(
+    301         f"In the future `np.{attr}` will be defined as the "
+    302         "corresponding NumPy scalar.", FutureWarning, stacklevel=2)
+    304 if attr in __former_attrs__:
+--> 305     raise AttributeError(__former_attrs__[attr])
+    307 # Importing Tester requires importing all of UnitTest which is not a
+    308 # cheap import Since it is mainly used in test suits, we lazy import it
+    309 # here to save on the order of 10 ms of import time for most users
+    310 #
+    311 # The previous way Tester was imported also had a side effect of adding
+    312 # the full `numpy.testing` namespace
+    313 if attr == 'testing':
+
+AttributeError: module 'numpy' has no attribute 'float'.
+`np.float` was a deprecated alias for the builtin `float`. To avoid this error in existing code, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
+The aliases was originally deprecated in NumPy 1.20; for more details and guidance see the original release note at:
+    https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+```
+
+If you replace all instances of `np.float` with `float` in */projectnb/ecog/eds2/.conda/envs/cnn-specgram/lib/python3.8/site-packages/bcolz/toplevel.py*, this fixes the problem. Alternatively, replace the entire file with the file provided in this repo (you may need to restart the kernel after this):
+
+```
+mydir="/projectnb/ecog/eds2/.conda/envs/cnn-specgram/lib/python3.8/site-packages/bcolz/"
+cp toplevel.py $mydir
+```
+
+</details>
+
+
 ## Files
 
 * `.gitignore`
