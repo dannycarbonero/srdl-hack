@@ -1,6 +1,9 @@
-# Sample Project
+# Project: Automated spike-ripple detection using deep learning
 
 This is as an example on how teams can structure their project repositories. Thanks to Lindsey Heagey and Joachim Meyer for the template!
+
+This is forked from the code corresponding to the paper with minor updates relating to package versions.
+https://github.com/eschlaf2/CNN_Spectrogram_Algorithm
 
 ## Files
 
