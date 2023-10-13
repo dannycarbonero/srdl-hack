@@ -7,6 +7,26 @@ https://github.com/eschlaf2/CNN_Spectrogram_Algorithm
 
 ## Troubleshooting
 
+<details>
+  <summary>The trained model is only a 3-line text file</summary>
+
+  Github limits the size of tracked files. You can use an extension to track larger files (https://git-lfs.com/); without this, you will just see a reference to file. 
+
+Download the model using `wget`:
+  ```
+wget https://github.com/eschlaf2/CNN_Spectrogram_Algorithm/blob/master/full_trained_model.pkl
+  ```
+
+Initialize git LFS (on the SCC - you may need to install it on your home computer first; see https://git-lfs.com/):
+```
+git lfs install
+```
+
+For more info, see https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-git-large-file-storage.
+
+  
+</details>
+
 You might get an error when you try to import `bcolz` because it assumes an older version of NumPy. 
 
 <details>
