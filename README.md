@@ -60,5 +60,6 @@ Building from what you learn at this hackweek, what new approaches would you lik
 
 ### Background reading
 
-Optional: links to manuscripts or technical documents for more in-depth analysis.
+Nadalin, Jessica K., Uri T. Eden, Xue Han, R. Mark Richardson, Catherine J. Chu, and Mark A. Kramer. 2021. “Application of a Convolutional Neural Network for Fully-Automated Detection of Spike Ripples in the Scalp Electroencephalogram.” Journal of Neuroscience Methods 360 (August): 109239. https://doi.org/10.1016/j.jneumeth.2021.109239.
+
 
