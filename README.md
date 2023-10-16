@@ -27,11 +27,18 @@ For more info, see https://docs.github.com/en/repositories/working-with-files/ma
   
 </details>
 
-You might get an error when you try to import `bcolz` because it assumes an older version of NumPy. 
-
 <details>
-  <summary>bcolz/np.float error</summary>
-  
+  <summary>You get an error in bcolz because it uses deprecated np.float type</summary>
+
+  If you replace all instances of `np.float` with `float` in */projectnb/ecog/eds2/.conda/envs/cnn-specgram/lib/python3.8/site-packages/bcolz/toplevel.py* (update the location to match your directory structure - the location should show up in the error), this fixes the problem. Alternatively, replace the entire file with the file provided in this repo (you may need to restart the kernel after this):
+
+```
+mydir="/projectnb/ecog/eds2/.conda/envs/cnn-specgram/lib/python3.8/site-packages/bcolz/"
+cp toplevel.py $mydir
+```
+
+  This is the error I got when trying to run `demo_training_functions.py`:
+
 ```python
 ---------------------------------------------------------------------------
 AttributeError                            Traceback (most recent call last)
@@ -92,13 +99,6 @@ AttributeError: module 'numpy' has no attribute 'float'.
 `np.float` was a deprecated alias for the builtin `float`. To avoid this error in existing code, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
 The aliases was originally deprecated in NumPy 1.20; for more details and guidance see the original release note at:
     https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
-```
-
-If you replace all instances of `np.float` with `float` in */projectnb/ecog/eds2/.conda/envs/cnn-specgram/lib/python3.8/site-packages/bcolz/toplevel.py*, this fixes the problem. Alternatively, replace the entire file with the file provided in this repo (you may need to restart the kernel after this):
-
-```
-mydir="/projectnb/ecog/eds2/.conda/envs/cnn-specgram/lib/python3.8/site-packages/bcolz/"
-cp toplevel.py $mydir
 ```
 
 </details>
