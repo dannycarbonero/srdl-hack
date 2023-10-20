@@ -2,8 +2,8 @@
 
 This is as an example on how teams can structure their project repositories. Thanks to Lindsey Heagey and Joachim Meyer for the template!
 
-Code in CNN_Spectrogram_Algorithm is forked from the code corresponding to the paper with minor updates relating to package versions.
-https://github.com/Eden-Kramer-Lab/CNN_Spectrogram_Algorithm
+Code in CNN_Spectrogram_Algorithm is forked from the code corresponding to the paper with minor updates relating to package versions:
+> Nadalin, Jessica K., Uri T. Eden, Xue Han, R. Mark Richardson, Catherine J. Chu, and Mark A. Kramer. 2021. “Application of a Convolutional Neural Network for Fully-Automated Detection of Spike Ripples in the Scalp Electroencephalogram.” Journal of Neuroscience Methods 360 (August): 109239. https://doi.org/10.1016/j.jneumeth.2021.109239. [[Code]](https://github.com/Eden-Kramer-Lab/CNN_Spectrogram_Algorithm)
 
 
 ## Files
