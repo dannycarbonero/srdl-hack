@@ -110,4 +110,14 @@ venv.bak/
 *.nc
 *.tif
 
+# Temporary files
 .DS_Store
+*.swp
+
+*.pycache/
+*.log
+*.html
+CNN_Spectrogram_Algorithm/Demo-Application/demo_spectra_images/test
+CNN_Spectrogram_Algorithm/fastai*/__pycache__
+CNN_Spectrogram_Algorithm/Demo-Training/tmp
+
