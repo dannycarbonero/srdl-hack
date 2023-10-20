@@ -165,5 +165,6 @@ Building from what you learn at this hackweek, what new approaches would you lik
 * Nadalin, Jessica K., Uri T. Eden, Xue Han, R. Mark Richardson, Catherine J. Chu, and Mark A. Kramer. 2021. “Application of a Convolutional Neural Network for Fully-Automated Detection of Spike Ripples in the Scalp Electroencephalogram.” Journal of Neuroscience Methods 360 (August): 109239. https://doi.org/10.1016/j.jneumeth.2021.109239.
 
 * [MATLAB Deep Learning Course](https://matlabacademy.mathworks.com/details/mldl) ([Course quick-reference](https://matlabacademy.mathworks.com/artifacts/quick-reference.html?course=mldl&language=en&release=R2023a))
+  * [Deep learning tips and tricks](https://www.mathworks.com/help/deeplearning/ug/deep-learning-tips-and-tricks.html)
 
 
