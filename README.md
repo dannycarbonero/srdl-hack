@@ -2,7 +2,7 @@
 
 The Kramer-Eden-Chu lab hackathon to use deep learning to create an automated spike-ripple detector. This builds on the project in [Nadalin et al., 2021](https://doi.org/10.1016/j.jneumeth.2021.109239). Exact aims will depend on what we decide to do during the hackathon, but some examples include
 
-* Use a model pre-trained on a different set of images (e.g., satellite images instead of natural images)
+* Use a model pre-trained on a different set of images (e.g., satellite imagery instead of natural images)
 * Account for expected artifacts (e.g., broadband increases in power)
 * Use an LSTM-based RNN
 * Augment the training dataset
