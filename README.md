@@ -1,9 +1,27 @@
 # Project: Automated spike-ripple detection using deep learning
 
-This is as an example on how teams can structure their project repositories. Thanks to Lindsey Heagey and Joachim Meyer for the template!
+The Kramer-Eden-Chu lab hackathon to use deep learning to create an automated spike-ripple detector. This builds on the project in [Nadalin et al., 2021](https://doi.org/10.1016/j.jneumeth.2021.109239). Exact aims will depend on what we decide to do during the hackathon, but some examples include
 
-Code in CNN_Spectrogram_Algorithm is forked from the code corresponding to the paper with minor updates relating to package versions:
-> Nadalin, Jessica K., Uri T. Eden, Xue Han, R. Mark Richardson, Catherine J. Chu, and Mark A. Kramer. 2021. “Application of a Convolutional Neural Network for Fully-Automated Detection of Spike Ripples in the Scalp Electroencephalogram.” Journal of Neuroscience Methods 360 (August): 109239. https://doi.org/10.1016/j.jneumeth.2021.109239. [[Code]](https://github.com/Eden-Kramer-Lab/CNN_Spectrogram_Algorithm)
+* Use a model pre-trained on a different set of images (e.g., satellite imagery instead of natural images)
+* Account for expected artifacts (e.g., broadband increases in power)
+* Use an LSTM-based RNN
+* Augment the training dataset
+
+### Possible resources
+
+* Nadalin, Jessica K., Uri T. Eden, Xue Han, R. Mark Richardson, Catherine J. Chu, and Mark A. Kramer. 2021. “**Application of a Convolutional Neural Network for Fully-Automated Detection of Spike Ripples in the Scalp Electroencephalogram.**” Journal of Neuroscience Methods 360 (August): 109239. https://doi.org/10.1016/j.jneumeth.2021.109239. [[Code](https://github.com/Eden-Kramer-Lab/CNN_Spectrogram_Algorithm)]
+
+* Hagen, Espen, Anna R. Chambers, Gaute T. Einevoll, Klas H. Pettersen, Rune Enger, and Alexander J. Stasik. 2021. “**RippleNet: A Recurrent Neural Network for Sharp Wave Ripple (SPW-R) Detection.**” Neuroinformatics 19 (3): 493–514. https://doi.org/10.1007/s12021-020-09496-2. [[Code](https://github.com/CINPLA/RippleNet)]
+
+* Sarmashghi, Mehrad, Shantanu P. Jadhav, and Uri T. Eden. 2022. “**Integrating Statistical and Machine Learning Approaches for Neural Classification.**” IEEE Access 10: 119106–18. https://doi.org/10.1109/ACCESS.2022.3221436. 
+
+* [MATLAB Deep Learning Course](https://matlabacademy.mathworks.com/details/mldl) ([Course quick-reference](https://matlabacademy.mathworks.com/artifacts/quick-reference.html?course=mldl&language=en&release=R2023a))
+    * [Deep learning tips and tricks](https://www.mathworks.com/help/deeplearning/ug/deep-learning-tips-and-tricks.html)
+* Free [deep learning ebook](https://www.deeplearningbook.org/)
+*	[3b1b explanation of neural networks](https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi)
+*	[Fastai](https://www.fast.ai/) (course, tutorials, fastai for PyTorch)
+    *	Coincidentally, [this interview](https://podcasters.spotify.com/pod/show/nobila-nadhira/episodes/Episode-391-Jeremy-Howard-on-Deep-Learning-and-fast-ai-ek6fos) with Jeremy Howard of fastai just came out - he's very interested in making deep learning and AI accessible
+*	[Google Machine Learning Education](https://developers.google.com/machine-learning)
 
 
 ## Files
@@ -64,9 +82,6 @@ Building from what you learn at this hackweek, what new approaches would you lik
 
 ### Background reading
 
-* Nadalin, Jessica K., Uri T. Eden, Xue Han, R. Mark Richardson, Catherine J. Chu, and Mark A. Kramer. 2021. “Application of a Convolutional Neural Network for Fully-Automated Detection of Spike Ripples in the Scalp Electroencephalogram.” Journal of Neuroscience Methods 360 (August): 109239. https://doi.org/10.1016/j.jneumeth.2021.109239.
-
-* [MATLAB Deep Learning Course](https://matlabacademy.mathworks.com/details/mldl) ([Course quick-reference](https://matlabacademy.mathworks.com/artifacts/quick-reference.html?course=mldl&language=en&release=R2023a))
-  * [Deep learning tips and tricks](https://www.mathworks.com/help/deeplearning/ug/deep-learning-tips-and-tricks.html)
+* Nadalin, Jessica K., Uri T. Eden, Xue Han, R. Mark Richardson, Catherine J. Chu, and Mark A. Kramer. 2021. “Application of a Convolutional Neural Network for Fully-Automated Detection of Spike Ripples in the Scalp Electroencephalogram.” Journal of Neuroscience Methods 360 (August): 109239. https://doi.org/10.1016/j.jneumeth.2021.109239. [[Code](https://github.com/Eden-Kramer-Lab/CNN_Spectrogram_Algorithm)]
 
 
