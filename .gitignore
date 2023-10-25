@@ -117,7 +117,13 @@ venv.bak/
 *.pycache/
 *.log
 *.html
+
+# Related to CNN_Spectrogram_Algorithm (don't update simulated data)
 CNN_Spectrogram_Algorithm/Demo-Application/demo_spectra_images/test
 CNN_Spectrogram_Algorithm/fastai*/__pycache__
 CNN_Spectrogram_Algorithm/Demo-Training/tmp
+
+# Spike-Ripple data
+Spike_Ripple_Training_Data/*
+
 
