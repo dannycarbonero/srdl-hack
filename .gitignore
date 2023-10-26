@@ -125,5 +125,9 @@ CNN_Spectrogram_Algorithm/Demo-Training/tmp
 
 # Spike-Ripple data
 Spike_Ripple_Training_Data/*
+Spike_Ripple_Training_Data*
+
+# Model weights
+model_weights/*
 
 
