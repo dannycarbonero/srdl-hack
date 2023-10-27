@@ -1,3 +1,5 @@
+% Copied from
+% ~/Documents/MATLAB/Examples/R2022b/nnet/TransferLearningUsingGoogLeNetExample/findLayersToReplace.m
 % findLayersToReplace(lgraph) finds the single classification layer and the
 % preceding learnable (fully connected or convolutional) layer of the layer
 % graph lgraph.
