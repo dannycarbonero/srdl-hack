@@ -1,118 +1,232 @@
-% Make sims using Mark's simulation code
-
 % Create the simulated data in Figure 2 of [Chu et al, J Neurosci Methods, 2017]
-% Downloaded from https://github.com/Mark-Kramer/Spike-Ripple-Detector-Method.git, simulations branch
 
-function [d0,t0] = make_sims(simulation, Fs, T)
-% make_sims(simulation, Fs [Hz], T [s])
+function [sig, t, spikeTrain, hannTrain, hfoTrain] = make_sims(simulation, T, Fs, everyNth, varargin)
+% [sig, t, spikeTrain, hannTrain, hfoTrain] = make_sims(simulation, T, Fs, everyNth, varargin)
+% Creates a train of spikes or spike-ripples on a background of pink noise.
+% Input args:
+%   simulation (default: "Pink+Spike+HFO"): Options are 
+%       "Pink": pink noise
+%       "Pink+Pulse": pink noise with triangular pulses
+%       "Pink+Spike": pink noise with spikes based on a template 
+%       "Pink+Spike+HFO": pink noise with spike-ripples (spikes with high
+%           frequency oscillations)
+%   T (default: 600): duration of the signal in seconds
+%   Fs (default: 2035): sampling frequency of the signal in Hz
+%   everyNth (default: 1): add HFOs to every n-th spike if simulation type is Pink+Spike
+%       + HFO 
+%
+% Optional name-value pair arguments:
+%   'SpikeSNR', 20: signal to noise ratio of spikes (or pulses)
+%   'HfoSNR', 2: signal to noise ratio of the HFOs
+%   'HfoOnset', .0934: onset time of the HFOs relative to the spike onset
+%       (this is highly dependent on the template waveform)
+%   'HfoPassband', [110 120]: frequency of HFOs (filtered from a white
+%       noise signal)
+%   'HfoDuration', .05: duration (s) of the HFO component of the spike-ripple
+%       (width of the Hann window used to isolate the ripple component of
+%       thte signals)
+%   'PulseWidth', .05: width of the triangular pulse (in seconds) for
+%       "Pink+Pulse" simulations
+%   'SpikeTimes', (.5:1:T-1) : times (in seconds) of spikes or pulses
+%
+% Outputs:
+%   sig: the simulated signal (pink + spikeTrain + hfoTrain)
+%   t: time
+%   spikeTrain: the spike component of the simulated signal
+%   hannTrain: the hann-window component of the simulated signal
+%   hfoTrain: the ripple component of the simulated signal
 
-simulation = validatestring(simulation, ...
-    ["Pink", "Pink+Pulse", "Pink+Spike", ...
-        "Pink+Spike+HFO", "Pink+Spike+HFO+30%"] ...
+
+%% Parse inputs
+simulation = validatestring(simulation, [ ...
+    "Pink" ...  % pink noise
+    , "Pink+Pulse" ...  % Pink noise with triangular pulses
+    , "Pink+Spike" ...  % Pink noise plus spikes (from template in average_spike.mat)
+    , "Pink+Spike+HFO" ...  % Pink noise plus spikes with HFOs
+    ]);
+
+if nargin < 1 || isempty(simulation), simulation = "Pink+Spike+HFO"; end  % spike-ripple
+if nargin < 2 || isempty(T), T = 60*10; end  % duration of simulation (10 minutes)
+if nargin < 3 || isempty(Fs), Fs = 2035; end  % Sampling rate
+if nargin < 4 || isempty(everyNth), everyNth = 1; end  % Add an HFO to every n-th spike
+
+P = struct( ...
+    'SpikeSNR', 20 ...  % 20 * SD(noise)
+    , 'HfoSNR', 2 ...  % 1 * SD(noise)
+    , 'HfoOnset', .0934 ... % 93.4 ms after spike onset
+    , 'HfoPassband', [110 120] ...  % 110-120 Hz
+    , 'HfoDuration', 0.050 ... % 50 ms
+    , 'PulseWidth', 0.05 ...  % 50 ms
+    , 'SpikeTimes', [] ...  % defaults to 1:T-1
     );
 
-% Sampling rate
-if nargin < 2 || isempty(Fs), Fs = 2035; end
-% duration to simulation
-if nargin < 3 || isempty(T), T = 60*10; end
+% See if Fs or everyNth are characters or strings and if so, move them to
+% varargin
+if ismember(class(Fs), ["string" "char"])
+    varargin = [Fs, everyNth, varargin]; 
+    Fs = []; 
+    everyNth = []; 
+end
+if ismember(class(everyNth), ["string", "char"])
+    varargin = [everyNth, varargin]; 
+    everyNth = [];
+end
 
-% Say things...
-fprintf('Running %s simulation ... \n', simulation)
+% Parse name-value pairs
+for ii = 1:2:numel(varargin)
+    arg = validatestring(varargin{ii}, fields(P));
+    val = varargin{ii + 1};
+    P.(arg) = val;
+end
+
+% Set default spike times and remove invalid times if given as argument
+if isempty(P.SpikeTimes)
+    spikeTimes = .5:T - 1;
+else
+    spikeTimes = P.SpikeTimes;
+    spikeTimes(spikeTimes > T - 1 || spikeTimes < 0) = [];
+end
+
+% ... make arguments into ints
+Fs = round(Fs); T = ceil(T); everyNth = round(everyNth);
+
+% ... report what's running 
+fprintf('Running %s simulation (Fs=%d, T=%d, everyNth=%d) ... \n' ...
+    , simulation, Fs, T, everyNth);
+
+
+%% Main
 
 % Create pink noise time series
-d0 = make_pink_noise(0.5,T*Fs,1/Fs);
+t = 1/Fs : 1/Fs : T;
+pink = make_pink_noise(0.5, t);
+stdNoise = std(pink);
 
-% 
+% ... initialize output variables
+if nargout > 2
+    [spikeTrain, hannTrain, hfoTrain] = deal([]);
+end
+
 
 switch simulation
     case "Pink"
-        % do nothing
+        sig = pink;
+
     case "Pink+Pulse"
-        fprintf(['Running Pink+Pulse simulation ... \n'])
-        t = 1/Fs : 1/Fs : T;
-        d = 1/Fs : 1    : T;
-        y = pulstran(t,d,'tripuls',0.05,0);
-        y = y / max(y);
-        [~, i0] = findpeaks(y);
-        for i=1:length(i0)
-          y(i0(i)-100:i0(i)+100) = 20*std(d0)*y(i0(i)-100:i0(i)+100);
-        end
-        d0 = d0 + y';
+        % Generate a signal with triangular pulses at indicated times
+        spikeTrain = pulstran(t, spikeTimes, 'tripuls', P.PulseWidth, 0);  % skew=0
 
-    case ["Pink+Spike", "Pink+Spike+HFO"]
-          load('average_spike.mat', 'Fs', 'spike')
-          Fs = round(Fs);
-          spike = spike - mean(spike);
-          spike = spike / max(spike);
-          spikeH = spike .*hann(length(spike));
-          spike0 = spikeH;
-          std0 = std(d0);
-          for i=1:T
-              spike = spike0;
-
-              if simulation == "Pink+Spike+HFO"
-                  % ... add an HFO to the spike waveform
-
-                  HFO = randn(Fs,1);  % 1 s normal random
-                  Wn = [110, 120]/(Fs/2);	%...set the passband,
-                  n  = 100;					%...and filter order,
-                  b  = fir1(n,Wn);			%...build bandpass filter.
-                  HFO = filtfilt(b,1,HFO);	%...and apply filter.
+        % ... rescale pulses
+        spikeTrain = rescale(spikeTrain, 0, P.SpikeSNR * stdNoise); 
         
-                  % filtered HFO
-                  HFO = HFO(1000:1000+round(0.05*Fs)-1);
-                  HFO = hann(length(HFO)).*HFO;
-                  HFO = HFO/std(HFO);
-                  HFO = 0.05*std(spike)*HFO;
+        % ... add pulses to pink noise
+        sig = pink + spikeTrain;
 
-                  istart = 190;
-                  spike(istart:istart+length(HFO)-1) = spike(istart:istart+length(HFO)-1) + 1*HFO;
-              end
+    case {"Pink+Spike", "Pink+Spike+HFO"}
+        % Load the spike template and scale it
+        spike = load_spike_template(Fs) * P.SpikeSNR * stdNoise;
 
-              i0 = round(Fs/2) + round((i-1)*Fs);
-              d0(i0:i0+length(spike)-1) = d0(i0:i0+length(spike)-1) + 20*std0*spike;
-          end
-    case "Pink+Spike+HFO+30%"
+        % ... initialize empty spike and hann window trains
+        [spikeTrain, hannTrain] = deal(zeros(size(pink)));
+
+        % ... generate a signal with template spikes
+        for tt = spikeTimes
+            % ... inject the spike into spikeTrain
+            inds = find(t >= tt, 1) + (0 : length(spike)-1);
+            spikeTrain(inds) = spike;
+        end
+
+        % ... add the spike train and pink noise signals together
+        sig = pink + spikeTrain;
+
+        % ... add HFOs to the waveform (if requested)
+        if simulation == "Pink+Spike+HFO"  
+            % Create a pulse train of scaled Hann windows
+            hannWin = hann(round(P.HfoDuration * Fs)) * P.HfoSNR * stdNoise;
+            for tt = spikeTimes(1:everyNth:end) + P.HfoOnset
+                inds = find(t >= tt, 1) + (0: length(hannWin) - 1);
+                hannTrain(inds) = hannWin;
+            end
+
+            % ... multiply by a persistent HFO signal and scale
+            HFO = create_HFO(t, P.HfoPassband);
+            hfoTrain = hannTrain .* HFO;
+
+            % ... add the signals together
+            sig = sig + hfoTrain;
+        end
+
+
+    otherwise
+        error('Simulation %s not recognized', simulation)
+
+end
+  
+
+  
+end
+
+
+function HFO = create_HFO(t, passband)
+% HFO = create_HFO(Fs, passband=[110, 120], duration=0.05)
+% Create a `duration` s HFO in frequency range `passband`.
+
+if nargin < 2 || isempty(passband), passband = [110, 120]; end
+assert(numel(passband) == 2, 'Argument passband should be a 2-element vector of the form [low, high].')
+if nargin < 3 || isempty(duration), duration = .05; end  % 50 ms
+
+Fs = round(1/diff(t(1:2)));  % get the frequency
+whiteNoise = randn(size(t));  % 1 s normal random
+Wn = passband/(Fs/2);	%...set the passband,
+n  = 100;					%...and filter order,
+b  = fir1(n,Wn);			%...build bandpass filter.
+HFO = filtfilt(b, 1, whiteNoise);	%...and apply filter.
+HFO = normalize(HFO);  % z-score (center and standardize)
 
 end
 
-  
-  %%%%%%%%%% PINK+SPIKE+HFO+30% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  if strcmp(simulation, 'Pink+Spike+HFO+30%')
-      
-      
-      load(['average_spike.mat']);
-      Fs = round(Fs);
-      spike = spike - mean(spike);
-      spike = spike / max(spike);
-      spike = spike .*hann(length(spike));
-      spike0 = spike;
-      d0 = make_pink_noise(0.5,T*Fs,1/Fs);
-      std0 = std(d0);
-      
-      for i=1:600
-          spike = spike0;
-          i0 = round(Fs/2) + round((i-1)*Fs);
-          
-          if mod(i,3)==0
-              HFO = randn(Fs,1);
-              Wn = [110, 120]/(Fs/2);			%...set the passband,
-              n  = 100;                         %...and filter order,
-              b  = fir1(n,Wn);                  %...build bandpass filter.
-              HFO = filtfilt(b,1,HFO);          %...and apply filter.
-              HFO = HFO(1000:1000+round(0.05*Fs)-1);
-              HFO = hann(length(HFO)).*HFO;
-              HFO = HFO/std(HFO);
-              HFO = 0.05*std(spike)*HFO;
-              istart = 190;
-              spike(istart:istart+length(HFO)-1) = spike(istart:istart+length(HFO)-1) + 1*HFO;
-          end
-          
-          d0(i0:i0+length(spike)-1) = d0(i0:i0+length(spike)-1) + 20*std0*spike;
-      end
-  end
-  
-  t0 = (1:length(d0))/Fs;
+
+function spike = load_spike_template(Fs)
+% Load the template spike waveform from average_spike.mat, and resample to
+% frequency Fs if necessary
+
+spikeTemplate = load('average_spike.mat', 'Fs', 'spike');
+spikeTemplate.Fs = round(spikeTemplate.Fs);
+if spikeTemplate.Fs ~= Fs  % resample to frequency Fs
+    warning('Resampling spike template from %d Hz to %d Hz', spikeTemplate.Fs, Fs);
+    spike = resample(spikeTemplate.spike, Fs, spikeTemplate.Fs);
+else
+    spike = spikeTemplate.spike;
+end
+spike = spike - mean(spike);
+spike = spike / max(spike);
+spike = spike .* hann(length(spike));
+end
+
+
+function [x1new] = make_pink_noise(alpha, t)
+% Makes pink noise based on a vector of time points t
+
+dt = diff(t(1:2));
+L = 2 * ceil(numel(t)/2);
+
+x1 = randn(1, L);
+xf1 = fft(x1);
+A = abs(xf1);
+phase = angle(xf1);
+
+df = 1.0 / (dt * L);
+faxis = (0:L/2)*df;
+faxis = [faxis, faxis(end-1:-1:2)];
+oneOverf = 1.0 ./ faxis.^alpha;
+oneOverf(1)=0.0;
+
+Anew = A.*oneOverf;
+xf1new = Anew .* exp(1i*phase);
+x1new = real(ifft(xf1new));
+
+if numel(t) < L, x1new(end) = []; end
+if size(t, 1) > 1, x1new = x1new'; end
   
 end
 
