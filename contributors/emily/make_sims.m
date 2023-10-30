@@ -45,6 +45,18 @@ simulation = validatestring(simulation, [ ...
     , "Pink+Spike+HFO" ...  % Pink noise plus spikes with HFOs
     ]);
 
+% See if Fs or everyNth are characters or strings and if so, move them to
+% varargin
+if nargin > 2 && ismember(class(Fs), ["string" "char"])
+    varargin = [Fs, everyNth, varargin]; 
+    Fs = []; 
+    everyNth = []; 
+end
+if nargin > 3 && ismember(class(everyNth), ["string", "char"])
+    varargin = [everyNth, varargin]; 
+    everyNth = [];
+end
+
 if nargin < 1 || isempty(simulation), simulation = "Pink+Spike+HFO"; end  % spike-ripple
 if nargin < 2 || isempty(T), T = 60*10; end  % duration of simulation (10 minutes)
 if nargin < 3 || isempty(Fs), Fs = 2035; end  % Sampling rate
@@ -60,17 +72,6 @@ P = struct( ...
     , 'SpikeTimes', [] ...  % defaults to 1:T-1
     );
 
-% See if Fs or everyNth are characters or strings and if so, move them to
-% varargin
-if ismember(class(Fs), ["string" "char"])
-    varargin = [Fs, everyNth, varargin]; 
-    Fs = []; 
-    everyNth = []; 
-end
-if ismember(class(everyNth), ["string", "char"])
-    varargin = [everyNth, varargin]; 
-    everyNth = [];
-end
 
 % Parse name-value pairs
 for ii = 1:2:numel(varargin)
@@ -84,21 +85,17 @@ if isempty(P.SpikeTimes)
     spikeTimes = .5:T - 1;
 else
     spikeTimes = P.SpikeTimes;
-    spikeTimes(spikeTimes > T - 1 || spikeTimes < 0) = [];
+    spikeTimes(spikeTimes > T || spikeTimes < 0) = [];
 end
 
 % ... make arguments into ints
 Fs = round(Fs); T = ceil(T); everyNth = round(everyNth);
 
-% ... report what's running 
-fprintf('Running %s simulation (Fs=%d, T=%d, everyNth=%d) ... \n' ...
-    , simulation, Fs, T, everyNth);
-
 
 %% Main
 
 % Create pink noise time series
-t = 1/Fs : 1/Fs : T;
+t = 1/Fs : 1/Fs : T; 
 pink = make_pink_noise(0.5, t);
 stdNoise = std(pink);
 
@@ -126,14 +123,23 @@ switch simulation
         % Load the spike template and scale it
         spike = load_spike_template(Fs) * P.SpikeSNR * stdNoise;
 
+        % ... find where the spike has its max and align this to requested
+        % spike times
+        [~, offset] = max(spike);
+
         % ... initialize empty spike and hann window trains
         [spikeTrain, hannTrain] = deal(zeros(size(pink)));
 
         % ... generate a signal with template spikes
         for tt = spikeTimes
             % ... inject the spike into spikeTrain
-            inds = find(t >= tt, 1) + (0 : length(spike)-1);
-            spikeTrain(inds) = spike;
+            inds = find(t >= tt, 1) - offset + (0 : length(spike)-1);
+            if inds(end) > numel(spikeTrain) || inds(1) < 1
+                valid = inds > 0 & inds <= numel(spikeTrain);
+                spikeTrain(inds(valid)) = spike(valid);
+            else
+                spikeTrain(inds) = spike;
+            end
         end
 
         % ... add the spike train and pink noise signals together
@@ -144,8 +150,15 @@ switch simulation
             % Create a pulse train of scaled Hann windows
             hannWin = hann(round(P.HfoDuration * Fs)) * P.HfoSNR * stdNoise;
             for tt = spikeTimes(1:everyNth:end) + P.HfoOnset
-                inds = find(t >= tt, 1) + (0: length(hannWin) - 1);
-                hannTrain(inds) = hannWin;
+                if tt > t(end), continue; end
+                inds = find(t >= tt, 1) - offset + (0: length(hannWin) - 1);
+                if inds(1) < 1 || inds(end) > numel(hannTrain)
+                    valid = inds > 0 & inds <= numel(hannTrain);
+                    hannTrain(inds(valid)) = hannWin(valid);
+                else
+                    hannTrain(inds) = hannWin;
+                end
+                
             end
 
             % ... multiply by a persistent HFO signal and scale
@@ -161,7 +174,6 @@ switch simulation
         error('Simulation %s not recognized', simulation)
 
 end
-  
 
   
 end
