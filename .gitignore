@@ -118,6 +118,9 @@ venv.bak/
 *.log
 *.html
 
+temp.*
+tmp.*
+
 # Related to CNN_Spectrogram_Algorithm (don't update simulated data)
 CNN_Spectrogram_Algorithm/Demo-Application/demo_spectra_images/test
 CNN_Spectrogram_Algorithm/fastai*/__pycache__
