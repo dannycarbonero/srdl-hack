@@ -38,12 +38,6 @@ function [sig, t, spikeTrain, hannTrain, hfoTrain] = make_sims(simulation, T, Fs
 
 
 %% Parse inputs
-simulation = validatestring(simulation, [ ...
-    "Pink" ...  % pink noise
-    , "Pink+Pulse" ...  % Pink noise with triangular pulses
-    , "Pink+Spike" ...  % Pink noise plus spikes (from template in average_spike.mat)
-    , "Pink+Spike+HFO" ...  % Pink noise plus spikes with HFOs
-    ]);
 
 % See if Fs or everyNth are characters or strings and if so, move them to
 % varargin
@@ -61,6 +55,13 @@ if nargin < 1 || isempty(simulation), simulation = "Pink+Spike+HFO"; end  % spik
 if nargin < 2 || isempty(T), T = 60*10; end  % duration of simulation (10 minutes)
 if nargin < 3 || isempty(Fs), Fs = 2035; end  % Sampling rate
 if nargin < 4 || isempty(everyNth), everyNth = 1; end  % Add an HFO to every n-th spike
+
+simulation = validatestring(simulation, [ ...
+    "Pink" ...  % pink noise
+    , "Pink+Pulse" ...  % Pink noise with triangular pulses
+    , "Pink+Spike" ...  % Pink noise plus spikes (from template in average_spike.mat)
+    , "Pink+Spike+HFO" ...  % Pink noise plus spikes with HFOs
+    ]);
 
 P = struct( ...
     'SpikeSNR', 20 ...  % 20 * SD(noise)
