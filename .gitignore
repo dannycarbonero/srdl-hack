@@ -104,9 +104,6 @@ venv.bak/
 .mypy_cache/
 
 # Data files
-*.h5
-*.hdf
-*.hdf5
 *.nc
 *.tif
 
@@ -133,4 +130,8 @@ Spike_Ripple_Training_Data*
 # Model weights
 model_weights/*
 
-
+# Danny aditions
+/.idea
+/.ipynb_checkpoints
+**/*.egg-info
+**/__pycache__

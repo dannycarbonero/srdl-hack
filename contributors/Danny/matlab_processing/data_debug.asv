@@ -1,0 +1,6 @@
+data = squeeze(struct2cell(data))';
+subjects = unique(data(:,1));
+for i=1:length(subjects)
+    subject_indices = find(strcmp(subjects{i},data(:,1)))
+    subject_data = data(subject_indices,:)
+    yes_indinces = find(strcmp('y'm dat))
