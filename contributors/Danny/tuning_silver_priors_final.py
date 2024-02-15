@@ -21,7 +21,7 @@ data_path = get_parent_path('data', subdirectory ='Spike Ripples/silver')
 with open(data_path + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
-with open(data + 'silver_priors_data_frame.pkl', 'rb') as file:
+with open(data_path + 'silver_priors_data_frame.pkl', 'rb') as file:
     data_priors = pickle.load(file)
 
 #%% a few constants
@@ -50,12 +50,16 @@ with open(model_file, 'rb') as f:
 model = keras.models.load_model(RippleNet_path + best_model['model_file'])
 model.summary()
 
-model_checkpoint = tf.keras.callbacks.ModelCheckpoint(network_directory + 'RippleNet_tuned_optimal_' + subject + '.h5', monitor='loss', verbose=1, save_best_only=True, mode='min')
-checkpoint_history = keras.callbacks.CSVLogger(network_directory + 'RippleNet_tuning_history_' + subject + '.csv')
+model_checkpoint = tf.keras.callbacks.ModelCheckpoint(network_directory + 'RippleNet_tuned_optimal_priors.h5', monitor='loss', verbose=1, save_best_only=True, mode='min')
+checkpoint_history = keras.callbacks.CSVLogger(network_directory + 'RippleNet_tuning_history_priors.csv')
 checkpoint_list = [model_checkpoint, checkpoint_history]
 
 # pull data
-training_frame_y =
+shared_keys = ['classification', 'time','series']
+training_frame_y = data_priors[data_priors['classification'] == 'y'].sample(n = 6000)[shared_keys]
+training_frame_n = data_priors[data_priors['classification'] == 'n'].sample(n = 3000)[shared_keys]
+training_frame_bk = data[data['classification'] == 'bk'].sample(n = 3000, replace = True)[shared_keys]
+training_frame = pd.concat((training_frame_y, training_frame_y, training_frame_bk))
 
 # training data
 training_series = np.stack(np.array(training_frame.series))[:, cut_points:-cut_points]
@@ -103,7 +107,7 @@ training_set = training_set.batch(batch_size)
 
 
 history = model.fit(training_set, epochs = epochs, callbacks = checkpoint_list)#, validation_data=validation_set)
-with open(network_directory + 'RippleNet_tuning_history_' + subject +'.pkl', 'wb') as file:
+with open(network_directory + 'RippleNet_tuning_history_priors.pkl', 'wb') as file:
     pickle.dump(history.history, file)
 
-model.save(network_directory + 'RippleNet_tuned_' + subject + '.h5')
+model.save(network_directory + 'RippleNet_tuned_priors.h5')

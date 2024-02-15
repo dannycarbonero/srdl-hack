@@ -43,8 +43,9 @@ spike_times.columns = ['spike_start', 'spike_stop']
 
 master_frame = pd.concat([ripple_params, ripple_times, spike_params, spike_times], axis = 1)
 master_frame['classification'] = classifications
-master_frame['series'] = series.tolist()
 master_frame['time'] = time.tolist()
+master_frame['series'] = series.tolist()
+
 
 with open(save_path + 'silver_priors_data_frame.pkl', 'wb') as file:
     pkl.dump(master_frame, file)
