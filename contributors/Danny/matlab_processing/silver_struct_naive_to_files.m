@@ -1,5 +1,5 @@
 clear; clc;
-load_path_prefix ='/home/warehaus/Naive/'; %'/home/warehaus/Neural Data/Spike Ripples/silver/Schlafly/Naive/'; %'/home/SSD 1/Neural Data/Spike Ripples/silver/Schlafly/Naive/';
+load_path_prefix ='/home/warehaus/Naive/'; %'/home/warehaus/Neural Data/Spike Ripples/silver/Schlafly/naive/'; %'/home/SSD 1/Neural Data/Spike Ripples/silver/Schlafly/naive/';
 save_path = load_path_prefix; %'/home/warehaus/Neural Data/Spike Ripples/silver/naive_csvs/'; %'/home/SSD 1/Neural Data/Spike Ripples/silver/naive_csvs/';
 
 
