@@ -59,11 +59,12 @@ distance = int(RippleNet_Fs * distance_s)
 
 
 #%% process data for predicting
-data_frame = data.copy()
-series = np.stack(np.array(data_frame.series))
-time = np.stack(np.array(data_frame.time))
+
+testing_data = data[data['subject'].isin(LOO_subjects)]
+series = np.stack(np.array(testing_data.series))
+time = np.stack(np.array(testing_data.time))
 time = time - time[:,0].reshape(-1, 1)
-classifications = np.array(data_frame.classification)
+classifications = np.array(testing_data.classification)
 
 series = series[:, cut_points:-cut_points]
 time = time[:, cut_points:-cut_points]
