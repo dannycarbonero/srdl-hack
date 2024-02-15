@@ -59,7 +59,7 @@ for factor in augmentation_factors:
         print(f'Tuning on subject {subject} for {factor}x the original data')
 
         # load their model
-        RippleNet_path = get_parent_path('code', subdirectory='RippleNet')
+        RippleNet_path = get_parent_path('scc', subdirectory='RippleNet')
         model_file = RippleNet_path + 'best_model.pkl'
         with open(model_file, 'rb') as f:
             best_model = pickle.load(f)

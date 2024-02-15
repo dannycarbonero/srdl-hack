@@ -43,7 +43,7 @@ network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver
 for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
 
     #load their model
-    RippleNet_path = get_parent_path('code', subdirectory='RippleNet')
+    RippleNet_path = get_parent_path('scc', subdirectory='RippleNet')
     model_file = RippleNet_path + 'best_model.pkl'
     with open(model_file, 'rb') as f:
         best_model = pickle.load(f)
