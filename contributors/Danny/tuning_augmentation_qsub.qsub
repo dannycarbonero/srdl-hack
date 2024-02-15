@@ -6,7 +6,7 @@
 #$ -P ecog
 
 # Set hard limit on run time
-#$ -l h_rt=24:00:00
+#$ -l h_rt=48:00:00
 
 # Request 4 Cores
 #$ -pe omp 12

@@ -1,0 +1,50 @@
+2024-02-14 23:22:36.906164: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:9261] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2024-02-14 23:22:36.906213: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:607] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2024-02-14 23:22:36.907293: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1515] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+error: libdevice not found at ./libdevice.10.bc
+error: libdevice not found at ./libdevice.10.bc
+error: libdevice not found at ./libdevice.10.bc
+error: libdevice not found at ./libdevice.10.bc
+error: libdevice not found at ./libdevice.10.bc
+error: libdevice not found at ./libdevice.10.bc
+error: libdevice not found at ./libdevice.10.bc
+error: libdevice not found at ./libdevice.10.bc
+2024-02-14 23:22:51.093247: E tensorflow/compiler/mlir/tools/kernel_gen/tf_framework_c_interface.cc:207] INTERNAL: Generating device code failed.
+error: libdevice not found at ./libdevice.10.bc
+2024-02-14 23:22:51.538348: E tensorflow/compiler/mlir/tools/kernel_gen/tf_framework_c_interface.cc:207] INTERNAL: Generating device code failed.
+Traceback (most recent call last):
+  File "/projectnb/ecog/dcarbo/srdl-hack/contributors/Danny/tuning_silver_augmented_final.py", line 139, in <module>
+    history = model.fit(training_set, epochs = epochs, callbacks = checkpoint_list)#, validation_data=validation_set)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projectnb/ndlpop/dcarbo/.conda/envs/SRDL/lib/python3.11/site-packages/keras/src/utils/traceback_utils.py", line 70, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/projectnb/ndlpop/dcarbo/.conda/envs/SRDL/lib/python3.11/site-packages/tensorflow/python/eager/execute.py", line 53, in quick_execute
+    tensors = pywrap_tfe.TFE_Py_Execute(ctx._handle, device_name, op_name,
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tensorflow.python.framework.errors_impl.UnknownError: Graph execution error:
+
+Detected at node Adam/Pow defined at (most recent call last):
+  File "/projectnb/ecog/dcarbo/srdl-hack/contributors/Danny/tuning_silver_augmented_final.py", line 139, in <module>
+
+  File "/projectnb/ndlpop/dcarbo/.conda/envs/SRDL/lib/python3.11/site-packages/keras/src/utils/traceback_utils.py", line 65, in error_handler
+
+  File "/projectnb/ndlpop/dcarbo/.conda/envs/SRDL/lib/python3.11/site-packages/keras/src/engine/training.py", line 1807, in fit
+
+  File "/projectnb/ndlpop/dcarbo/.conda/envs/SRDL/lib/python3.11/site-packages/keras/src/engine/training.py", line 1401, in train_function
+
+  File "/projectnb/ndlpop/dcarbo/.conda/envs/SRDL/lib/python3.11/site-packages/keras/src/engine/training.py", line 1384, in step_function
+
+  File "/projectnb/ndlpop/dcarbo/.conda/envs/SRDL/lib/python3.11/site-packages/keras/src/engine/training.py", line 1373, in run_step
+
+  File "/projectnb/ndlpop/dcarbo/.conda/envs/SRDL/lib/python3.11/site-packages/keras/src/engine/training.py", line 1154, in train_step
+
+  File "/projectnb/ndlpop/dcarbo/.conda/envs/SRDL/lib/python3.11/site-packages/keras/src/optimizers/legacy/optimizer_v2.py", line 601, in minimize
+
+  File "/projectnb/ndlpop/dcarbo/.conda/envs/SRDL/lib/python3.11/site-packages/keras/src/optimizers/legacy/optimizer_v2.py", line 752, in apply_gradients
+
+  File "/projectnb/ndlpop/dcarbo/.conda/envs/SRDL/lib/python3.11/site-packages/keras/src/optimizers/legacy/optimizer_v2.py", line 1119, in _prepare
+
+  File "/projectnb/ndlpop/dcarbo/.conda/envs/SRDL/lib/python3.11/site-packages/keras/src/optimizers/legacy/adam.py", line 143, in _prepare_local
+
+JIT compilation failed.
+	 [[{{node Adam/Pow}}]] [Op:__inference_train_function_7135]

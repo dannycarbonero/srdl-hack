@@ -1,0 +1,3 @@
+Tuning on subject pBECTS003 for 1x the original data
+{'model_file': 'trained_networks/ripplenet_bidirectional_random_seed123.h5', 'threshold': 0.7, 'width': 0.0, 'distance': 62}
+Epoch 1/128
