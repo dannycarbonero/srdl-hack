@@ -89,16 +89,16 @@ predictions = predictions.squeeze()
 prediction_peaks = []
 for i in range(predictions.shape[0]):
     prediction_peaks.append(signal.find_peaks(predictions[i,:], height = height, width = width, distance = distance)[0])
-paired_classifications, predictions_bin_working = refined_classification(prediction_peaks, classifications_bin, labels)
+paired_classifications, predictions_bin = refined_classification(prediction_peaks, classifications_bin, labels)
 
 
 #%% plot
 plt.figure()
-confusion_matrix = metrics.confusion_matrix(paired_classifications, predictions_bin_working)
+confusion_matrix = metrics.confusion_matrix(paired_classifications, predictions_bin)
 cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=confusion_matrix, display_labels=[False, True])
 cm_display.plot()
 plt.title('Un-tuned Transfer Learning')
-plt.savefig(figure_directory + 'un-tuned_transfer.png')
+plt.savefig(figure_directory + 'un-tuned_transfer_LOO.png')
 plt.show()
 
 #%% THEIR DATA - check RippleNet_path/RippleNet_interactive_prototype.ipynb
