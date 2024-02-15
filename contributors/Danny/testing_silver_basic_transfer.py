@@ -32,6 +32,8 @@ model.summary()
 silver_Fs = 2035 # from simulation
 data_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver')
 
+LOO_subjects = generate_LOO_subjects()
+
 with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
