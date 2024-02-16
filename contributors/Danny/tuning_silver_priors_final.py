@@ -28,8 +28,8 @@ with open(data_path + 'silver_priors_val_data_frame.pkl', 'rb') as file:
     val_priors = pickle.load(file)
 
 #%% a few constants
-cut_fractor = 0.75
-cut_points = int(silver_Fs * cut_fractor)
+cut_factor = 0.75
+cut_points = int(silver_Fs * cut_factor)
 RippleNet_Fs = 1250
 label_center_s = 1
 pre_center_s = 0.1
