@@ -1,5 +1,8 @@
 import numpy as np
 import pandas as pd
+import pickle as pkl
+from tensorflow import keras
+from directory_handling import get_parent_path
 
 def binarize_classifications(classifications):
 
@@ -147,3 +150,18 @@ def generate_LOO_subjects(numbers = None):
     LOO_subjects = ["pBECTS0" + number for number in numbers]
 
     return LOO_subjects
+
+
+
+def load_RippleNet(context):
+
+    RippleNet_path = get_parent_path(context, subdirectory='RippleNet')
+    model_file = RippleNet_path + 'best_model.pkl'
+    with open(model_file, 'rb') as f:
+        best_model = pkl.load(f)
+        print(best_model)
+
+    model = keras.models.load_model(RippleNet_path + best_model['model_file'])
+    # model.summary()
+
+    return model
