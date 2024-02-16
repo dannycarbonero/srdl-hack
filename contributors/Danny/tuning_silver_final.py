@@ -91,7 +91,7 @@ for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
 
     # make labels
     training_labels = np.expand_dims(make_refined_labels(training_classifications, training_time_downsampled, center_s = label_center_s, pre_center_s = pre_center_s, post_center_s = post_center_s), 2)
-    # validation_labels = np.expand_dims(make_refined_labels(validation_classifications, validation_time_downsampled, center_s = label_center_s, pre_center_s = pre_center_s, post_center_s = post_center_s), 2)
+    validation_labels = np.expand_dims(make_refined_labels(validation_classifications, validation_time_downsampled, center_s = label_center_s, pre_center_s = pre_center_s, post_center_s = post_center_s), 2)
 
     # create data sets
     training_set = tf.data.Dataset.from_tensor_slices((training_series_downsampled, training_labels))
