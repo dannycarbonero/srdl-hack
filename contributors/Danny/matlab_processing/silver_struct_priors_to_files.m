@@ -1,9 +1,15 @@
 clear; clc;
-load_path_prefix ='/home/warehaus/Neural Data/Spike Ripples/silver/Schlafly/priors/'; %'/home/SSD 1/Neural Data/Spike Ripples/silver/Schlafly/priors/';
-save_path = '/home/warehaus/Neural Data/Spike Ripples/silver/priors_csvs/'; %'/home/SSD 1/Neural Data/Spike Ripples/silver/priors_csvs/';
+
+load_path_prefix ='/home/SSD 1/Neural Data/Spike Ripples/silver/Schlafly/priors/';
+save_path = '/home/SSD 1/Neural Data/Spike Ripples/silver/priors_csvs/';
+
+% load_path_prefix ='/home/warehaus/Neural Data/Spike Ripples/silver/Schlafly/priors/';
+% save_path = '/home/warehaus/Neural Data/Spike Ripples/silver/priors_csvs/';
 
 
-file_names = {'yes', 'no', 'artifact'};
+% file_names = {'yes', 'no', 'artifact'};
+
+file_names = {'yes_1000_2024-02-16', 'no_1000_2024-02-16'};
 
 for i = 1:length(file_names)
     

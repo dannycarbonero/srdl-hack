@@ -165,3 +165,6 @@ def load_RippleNet(context):
     # model.summary()
 
     return model
+
+def pull_event_probabilities():
+    pass

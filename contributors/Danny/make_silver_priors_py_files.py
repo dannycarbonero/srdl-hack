@@ -5,7 +5,9 @@ import pandas as pd
 import pickle as pkl
 from directory_handling import get_parent_path
 
-file_prefixes = ['yes', 'no', 'artifact']
+# file_prefixes = ['yes', 'no', 'artifact']
+# file_prefixes = ['yes_1000_2024-02-16', 'no_1000_2024-02-16'];
+
 classification_legend = ['y', 'n', 'a']
 
 ripple_params = []
@@ -47,5 +49,5 @@ master_frame['time'] = time.tolist()
 master_frame['series'] = series.tolist()
 
 
-with open(save_path + 'silver_priors_data_frame.pkl', 'wb') as file:
+with open(save_path + 'silver_priors_val_data_frame.pkl', 'wb') as file:
     pkl.dump(master_frame, file)
