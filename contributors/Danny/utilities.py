@@ -24,38 +24,43 @@ def build_data_sets(training_frame,  batch_size, validation_frame = None, cut_fa
         training_classifications = np.delete(training_classifications, nan_series, axis=0)
     training_classifications_bin = binarize_classifications(training_classifications)
 
-    # validation data processing
-    validation_series = np.stack(np.array(validation_frame.series))[:, cut_points:-cut_points]
-    validation_time = np.stack(np.array(validation_frame.time))
-    validation_time = validation_time - validation_time[:, 0].reshape(-1, 1)
-    validation_time = validation_time[:, cut_points:-cut_points]
-    validation_classifications = np.array(validation_frame.classification)
-    nan_series = np.where(np.any(np.isnan(validation_series), axis=1))[0]
-    if np.any(nan_series):
-        validation_series = np.delete(validation_series, nan_series, axis=0)
-        validation_time = np.delete(validation_time, nan_series, axis=0)
-        validation_classifications = np.delete(validation_classifications, nan_series, axis=0)
-    validation_classifications_bin = binarize_classifications(validation_classifications)
-
-    # downsample
     training_series_downsampled = np.expand_dims(signal.resample(training_series, int(RippleNet_Fs / silver_Fs * training_series.shape[1]), axis=1), 2)
     training_time_downsampled = signal.resample(training_time, int(RippleNet_Fs / silver_Fs * training_time.shape[1]), axis=1)
-    validation_series_downsampled = np.expand_dims(signal.resample(validation_series, int(RippleNet_Fs / silver_Fs * validation_series.shape[1]), axis=1), 2)
-    validation_time_downsampled = signal.resample(training_time, int(RippleNet_Fs / silver_Fs * validation_time.shape[1]), axis=1)
-
-    # make labels
     training_labels = np.expand_dims(make_refined_labels(training_classifications, training_time_downsampled, center_s=label_center_s, pre_center_s=pre_center_s, post_center_s=post_center_s), 2)
-    validation_labels = np.expand_dims(make_refined_labels(validation_classifications, validation_time_downsampled, center_s=label_center_s, pre_center_s=pre_center_s, post_center_s=post_center_s), 2)
 
-    # create data sets
     training_set = tf.data.Dataset.from_tensor_slices((training_series_downsampled, training_labels))
     training_set = training_set.shuffle(training_series_downsampled.shape[0])
     training_set = training_set.batch(batch_size)
 
-    validation_set = tf.data.Dataset.from_tensor_slices((validation_series_downsampled, validation_labels))
-    validation_set = validation_set.shuffle(validation_series_downsampled.shape[0])
 
-    return training_set, validation_set
+    if validation_frame:
+
+        # validation data processing
+        validation_series = np.stack(np.array(validation_frame.series))[:, cut_points:-cut_points]
+        validation_time = np.stack(np.array(validation_frame.time))
+        validation_time = validation_time - validation_time[:, 0].reshape(-1, 1)
+        validation_time = validation_time[:, cut_points:-cut_points]
+        validation_classifications = np.array(validation_frame.classification)
+        nan_series = np.where(np.any(np.isnan(validation_series), axis=1))[0]
+        if np.any(nan_series):
+            validation_series = np.delete(validation_series, nan_series, axis=0)
+            validation_time = np.delete(validation_time, nan_series, axis=0)
+            validation_classifications = np.delete(validation_classifications, nan_series, axis=0)
+        validation_classifications_bin = binarize_classifications(validation_classifications)
+
+        validation_series_downsampled = np.expand_dims(signal.resample(validation_series, int(RippleNet_Fs / silver_Fs * validation_series.shape[1]), axis=1), 2)
+        validation_time_downsampled = signal.resample(training_time, int(RippleNet_Fs / silver_Fs * validation_time.shape[1]), axis=1)
+
+        validation_labels = np.expand_dims(make_refined_labels(validation_classifications, validation_time_downsampled, center_s=label_center_s, pre_center_s=pre_center_s, post_center_s=post_center_s), 2)
+
+        validation_set = tf.data.Dataset.from_tensor_slices((validation_series_downsampled, validation_labels))
+        validation_set = validation_set.shuffle(validation_series_downsampled.shape[0])
+
+        return training_set, validation_set
+
+    else:
+
+        return training_set
 
 
 
