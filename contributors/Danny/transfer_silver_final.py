@@ -58,6 +58,10 @@ for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
 
     training_frame = create_training_subset(training_frame, int(training_frame['classification'].value_counts()['y'] * 2))
 
+    with open(network_save_directory + subject +'val_frame.pkl', 'wb') as file:
+        pickle.dump(validation_frame, file)
+
+
     # training data processing
     training_series = np.stack(np.array(training_frame.series))[:, cut_points:-cut_points]
     training_time = np.stack(np.array(training_frame.time))

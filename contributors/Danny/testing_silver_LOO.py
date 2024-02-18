@@ -9,13 +9,14 @@ import h5py
 import pickle
 import pandas as pd
 from scipy import signal
-import matplotlib.pyplot as plt
 from sklearn import metrics
 
-from directory_handling import get_parent_path
-from utilities import binarize_classifications, refined_classification, make_refined_labels, generate_LOO_subjects
-from pathlib import Path
+import matplotlib.pyplot as plt
+plt.rcParams['font.family'] = 'Arial'
 
+from directory_handling import get_parent_path
+from utilities import binarize_classifications, refined_classification, make_refined_labels, generate_LOO_subjects, pull_event_probabilities
+from pathlib import Path
 
 #%% load Our Data
 silver_Fs = 2035 # from simulation
@@ -24,8 +25,8 @@ data_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver')
 with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_final')
-figure_directory ='figures/LOO_tuning_augmentations_128_epochs/'
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_val_1')
+figure_directory ='figures/LOO_tuning_val_1/'
 Path(figure_directory).mkdir(exist_ok = True)
 
 #%%
@@ -40,6 +41,7 @@ RippleNet_Fs = 1250
 label_center_s = 1
 pre_center_s = 0.1
 post_center_s = 0.05
+window_bounds = [label_center_s - pre_center_s, label_center_s + post_center_s]
 
 # prediction params
 height = 0.75
@@ -50,11 +52,12 @@ distance = int(RippleNet_Fs * distance_s)
 
 paired_classifications = []
 predictions_bin = []
+event_probabilities = []
 factor = 1
 
 for subject in LOO_subjects:
 
-    model = keras.models.load_model(network_directory + 'RippleNet_tuned_' + subject + '_' + str(factor) + 'x.h5')
+    model = keras.models.load_model(network_directory + 'RippleNet_tuned_' + subject + '.h5')
     model.summary()
 
     data_frame = data.copy()[data['subject']==subject]
@@ -87,6 +90,7 @@ for subject in LOO_subjects:
         prediction_peaks.append(signal.find_peaks(predictions[i,:], height = height, width = width, distance = distance)[0])
 
     paired_classifications_working, predictions_bin_working = refined_classification(prediction_peaks, classifications_bin, labels)
+    probabilities = pull_event_probabilities(predictions, time_downsampled, window_bounds)
 
     plt.figure()
     confusion_matrix = metrics.confusion_matrix(paired_classifications_working, predictions_bin_working)
@@ -96,16 +100,18 @@ for subject in LOO_subjects:
     plt.savefig(figure_directory + subject + '_' + str(factor) + 'x.png')
     plt.show()
 
+    paired_classifications.append(paired_classifications_working)
+    predictions_bin.append(predictions_bin_working)
 
-    paired_classifications.extend(paired_classifications_working)
-    predictions_bin.extend(predictions_bin_working)
 
 #%%
 
 confusion_matrix = metrics.confusion_matrix(paired_classifications,predictions_bin)
 cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix = confusion_matrix, display_labels = [False, True])
 cm_display.plot()
-plt.savefig(figure_directory + 'aggregate_' + str(factor) + 'x.png')
+plt.savefig(figure_directory + 'aggregate.png')
 plt.show()
+
+
 
 #%% THEIR DATA - check RippleNet_path/RippleNet_interactive_prototype.ipynb

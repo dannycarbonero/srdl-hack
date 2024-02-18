@@ -160,6 +160,16 @@ def refined_classification(prediction_peaks, classifications_bin, labels):
 
 
 
+def pull_event_probabilities(predictions, time, window_bounds):
+
+    cut_indices = np.where(np.logical_and(time > window_bounds[0], time < window_bounds[1]))
+    predictions = predictions[:,cut_indices]
+    probabilities = np.max(predictions, axis = 1)
+
+    return probabilities
+
+
+
 def create_training_subset(training_frame, num_samples):
 
     num_y = num_samples // 2  # 50% of N
@@ -228,6 +238,3 @@ def load_RippleNet(context):
     return model
 
 
-
-def pull_event_probabilities():
-    pass

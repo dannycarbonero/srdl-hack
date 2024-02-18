@@ -49,6 +49,7 @@ for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
     checkpoint_list = [model_checkpoint, checkpoint_history]
 
 
+
     # pull validation data
     LOO_frame = data.copy()[data['subject']!=subject]
     frame_y = LOO_frame[LOO_frame['classification'] == 'y']
@@ -56,6 +57,10 @@ for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
     training_frame = LOO_frame.loc[LOO_frame.index.difference(validation_frame.index)]
 
     training_frame = create_training_subset(training_frame, int(training_frame['classification'].value_counts()['y'] * 2))
+
+    with open(network_directory + subject +'val_frame.pkl', 'wb') as file:
+        pickle.dump(validation_frame, file)
+
 
     # training data processing
     training_series = np.stack(np.array(training_frame.series))[:, cut_points:-cut_points]
@@ -107,3 +112,4 @@ for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
         pickle.dump(history.history, file)
 
     model.save(network_directory + 'RippleNet_tuned_' + subject + '.h5')
+
