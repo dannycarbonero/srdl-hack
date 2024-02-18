@@ -61,6 +61,8 @@ validation_frame_n = val_priors[val_priors['classification'] == 'n'].sample(n = 
 validation_frame_y = val_priors[val_priors['classification']== 'y'][shared_keys]
 validation_frame = pd.concat((validation_frame_y, validation_frame_n, validation_frame_bk))
 
+with open(network_directory + 'val_frame.pkl', 'wb') as file:
+    pickle.dump(validation_frame, file)
 
 # training data
 training_series = np.stack(np.array(training_frame.series))[:, cut_points:-cut_points]
