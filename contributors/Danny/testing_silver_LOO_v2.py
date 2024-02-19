@@ -62,10 +62,10 @@ predictions_aggregate = []
 
 for subject in LOO_subjects:
 
-    model = keras.models.load_model(network_directory + 'RippleNet_tuned_' + subject + '.h5')
+    model = keras.models.load_model(network_directory + 'RippleNet_tuned_optimal_' + subject + '.h5')
     model.summary()
 
-    with open(network_directory + subject + 'val_frame.pkl', 'rb') as file:
+    with open(network_directory + subject + '_val_frame.pkl', 'rb') as file:
         validation_frame = pickle.load(file)
 
     _, validation_data = build_data_sets(validation_frame,  cut_factor = cut_factor, silver_Fs = silver_Fs, RippleNet_Fs = RippleNet_Fs, label_center_s = label_center_s, pre_center_s = pre_center_s, post_center_s = post_center_s)
