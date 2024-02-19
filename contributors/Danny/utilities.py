@@ -4,10 +4,11 @@ import pickle as pkl
 import tensorflow as tf
 from tensorflow import keras
 from scipy import signal
+from sklearn.metrics import roc_curve, confusion_matrix
 
 from directory_handling import get_parent_path
 
-def build_data_sets(training_frame,  batch_size, validation_frame = None, cut_factor = 0.75, silver_Fs = 2035, RippleNet_Fs = 1250, label_center_s = 1, pre_center_s = 0.1, post_center_s = 0.05):
+def build_data_sets(training_frame,  batch_size = None, validation_frame = None, cut_factor = 0.75, silver_Fs = 2035, RippleNet_Fs = 1250, label_center_s = 1, pre_center_s = 0.1, post_center_s = 0.05):
 
     cut_points = int(silver_Fs * cut_factor)
 
@@ -30,8 +31,10 @@ def build_data_sets(training_frame,  batch_size, validation_frame = None, cut_fa
 
     training_set = tf.data.Dataset.from_tensor_slices((training_series_downsampled, training_labels))
     training_set = training_set.shuffle(training_series_downsampled.shape[0])
-    training_set = training_set.batch(batch_size)
+    if batch_size:
+        training_set = training_set.batch(batch_size)
 
+    training_dict = {'series_downsampled': training_series_downsampled.squeeze(), 'time_downsampled': training_time_downsampled, 'labels': training_labels.squeeze(), 'classifications': training_classifications_bin}
 
     if validation_frame:
 
@@ -56,11 +59,13 @@ def build_data_sets(training_frame,  batch_size, validation_frame = None, cut_fa
         validation_set = tf.data.Dataset.from_tensor_slices((validation_series_downsampled, validation_labels))
         validation_set = validation_set.shuffle(validation_series_downsampled.shape[0])
 
-        return training_set, validation_set
+        validation_dict = {'series_downsampled': validation_series_downsampled.squeeze(), 'time_downsampled': validation_time_downsampled, 'labels': validation_labels.squeze(), 'classifications': validation_classifications_bin}
+
+        return training_set, training_dict, validation_set, validation_dict
 
     else:
 
-        return training_set
+        return training_set, training_dict
 
 
 
@@ -129,6 +134,7 @@ def make_refined_labels(classifications, time, center_s = 1, pre_center_s = 0.1 
 
 
 
+
 def refined_classification(prediction_peaks, classifications_bin, labels):
 
     paired_classifications = []
@@ -160,13 +166,67 @@ def refined_classification(prediction_peaks, classifications_bin, labels):
 
 
 
+def classify_continuous_predictions(predictions, classifications, labels, peak_height, peak_width, peak_distance):
+
+    prediction_peaks = []
+    for i in range(predictions.shape[0]):
+        prediction_peaks.append(signal.find_peaks(predictions[i, :], height=peak_height, width=peak_width, distance=peak_distance)[0])
+
+    paired_classifications, predictions_bin = refined_classification(prediction_peaks, classifications, labels)
+
+    return paired_classifications, predictions_bin
+
+
+
 def pull_event_probabilities(predictions, time, window_bounds):
 
-    cut_indices = np.where(np.logical_and(time > window_bounds[0], time < window_bounds[1]))
+    cut_indices = np.where(np.logical_and(time[0,:] > window_bounds[0], time[0,:] < window_bounds[1]))[0]
     predictions = predictions[:,cut_indices]
     probabilities = np.max(predictions, axis = 1)
 
     return probabilities
+
+
+
+
+def find_optimum_ROC_threshold(probabilities, labels, cost_np = 1, cost_pn = 1):
+
+    # Compute the total instances in the positive and negative classes
+    P = np.sum(np.array(labels) == 1)
+    N = np.sum(np.array(labels) == 0)
+
+    # Calculate the slope S
+    S = (cost_np - 0) / (cost_pn - 0) * N / P
+
+    # Compute ROC curve
+    fpr, tpr, thresholds = roc_curve(labels, probabilities, drop_intermediate = False)
+
+    # Find the optimal operating point
+    optimal_index = np.argmin(abs(fpr - (1 - tpr) * S))
+    optimal_threshold = thresholds[optimal_index]
+    operating_point = [fpr[optimal_index], tpr[optimal_index]]
+
+    return optimal_threshold, operating_point
+
+
+def calculate_prediction_statistics(classifications, predictions):
+
+    # Generate confusion matrix
+    tn, fp, fn, tp = confusion_matrix(classifications, predictions).ravel()
+
+    # Calculate sensitivity (True Positive Rate)
+    sensitivity = tp / (tp + fn)
+
+    # Calculate specificity (True Negative Rate)
+    specificity = tn / (tn + fp)
+
+    # Calculate Positive Predictive Value (PPV)
+    ppv = tp / (tp + fp) if (tp + fp) else 0
+
+    # Calculate Negative Predictive Value (NPV)
+    npv = tn / (tn + fn) if (tn + fn) else 0
+
+    return sensitivity, specificity, ppv, npv
 
 
 
