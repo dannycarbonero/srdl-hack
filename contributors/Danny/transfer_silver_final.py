@@ -58,7 +58,7 @@ for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
 
     training_frame = create_training_subset(training_frame, int(training_frame['classification'].value_counts()['y'] * 2))
 
-    with open(network_save_directory + subject +'val_frame.pkl', 'wb') as file:
+    with open(network_save_directory + subject +'_val_frame.pkl', 'wb') as file:
         pickle.dump(validation_frame, file)
 
 
