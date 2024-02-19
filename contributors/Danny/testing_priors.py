@@ -26,9 +26,9 @@ data_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver')
 with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_2a')
-# figure_directory ='figures/LOO_tuning_val_1/'
-# Path(figure_directory).mkdir(exist_ok = True)
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_val_1')
+figure_directory ='figures/LOO_tuning_val_1/'
+Path(figure_directory).mkdir(exist_ok = True)
 
 #%%
 #LOO_subjects = [generate_LOO_subjects()[-1]] # LOO for current augmenting is 43
@@ -60,20 +60,19 @@ event_probabilities = []
 labels = []
 predictions_aggregate = []
 
-model = keras.models.load_model(network_directory + 'RippleNet_tuned_optimal_priors.h5')
-model.summary()
-
-with open(network_directory + 'val_frame.pkl', 'rb') as file:
-    validation_frame = pickle.load(file)
-
-_, validation_data = build_data_sets(validation_frame,  cut_factor = cut_factor, silver_Fs = silver_Fs, RippleNet_Fs = RippleNet_Fs, label_center_s = label_center_s, pre_center_s = pre_center_s, post_center_s = post_center_s)
-predictions = model.predict(np.expand_dims(validation_data['series_downsampled'], axis = 2)).squeeze()
-probabilities = pull_event_probabilities(predictions, validation_data['time_downsampled'], window_bounds)
-optimal_probability_threshold_val, optimal_operating_point_val = find_optimum_ROC_threshold(probabilities, validation_data['classifications'])
-
-
 for subject in LOO_subjects:
 
+    model = keras.models.load_model(network_directory + 'RippleNet_tuned_optimal_' + subject + '.h5')
+    model.summary()
+
+    with open(network_directory + subject + '_val_frame.pkl', 'rb') as file:
+        validation_frame = pickle.load(file)
+
+    _, validation_data = build_data_sets(validation_frame,  cut_factor = cut_factor, silver_Fs = silver_Fs, RippleNet_Fs = RippleNet_Fs, label_center_s = label_center_s, pre_center_s = pre_center_s, post_center_s = post_center_s)
+    predictions = model.predict(np.expand_dims(validation_data['series_downsampled'], axis = 2)).squeeze()
+    probabilities = pull_event_probabilities(predictions, validation_data['time_downsampled'], window_bounds)
+    optimal_probability_threshold, optimal_operating_point = find_optimum_ROC_threshold(probabilities, validation_data['classifications'])
+    optimal_thresholds.append(optimal_probability_threshold)
 
     testing_frame = data.copy()[data['subject']==subject]
     _, testing_data = build_data_sets(testing_frame,  cut_factor = cut_factor, silver_Fs = silver_Fs, RippleNet_Fs = RippleNet_Fs, label_center_s = label_center_s, pre_center_s = pre_center_s, post_center_s = post_center_s)
@@ -82,8 +81,9 @@ for subject in LOO_subjects:
     event_probabilities.append(probabilities)
     predictions_aggregate.append(predictions)
 
-    paired_classifications_working, predictions_bin_working = classify_continuous_predictions(predictions, testing_data['classifications'], testing_data['labels'], optimal_probability_threshold_val, width, distance)
+    paired_classifications_working, predictions_bin_working = classify_continuous_predictions(predictions, testing_data['classifications'], testing_data['labels'], optimal_probability_threshold, width, distance)
     ROC_statistics.append(metrics.roc_curve(testing_data['classifications'], probabilities))
+
 
 
     confusion_matrices.append(metrics.confusion_matrix(paired_classifications_working, predictions_bin_working).ravel())  # tn, fp, fn, tp

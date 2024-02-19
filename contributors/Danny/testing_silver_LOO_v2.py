@@ -27,8 +27,8 @@ with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
 network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_val_1')
-figure_directory ='figures/LOO_tuning_val_1/'
-Path(figure_directory).mkdir(exist_ok = True)
+# figure_directory ='figures/LOO_tuning_val_1/'
+# Path(figure_directory).mkdir(exist_ok = True)
 
 #%%
 #LOO_subjects = [generate_LOO_subjects()[-1]] # LOO for current augmenting is 43
