@@ -144,6 +144,7 @@ ax_roc.set_xlim([-0.05, 1.05])
 ax_roc.scatter(operating_point_cum[0], operating_point_cum[1], color='k')
 ax_roc.set_xlabel('False Positive Rate')
 ax_roc.set_ylabel('True Positive Rate')
+ax_roc.legend(LOO_subjects)
 ax_roc.spines[['right', 'top']].set_visible(False)
 
 columns = ['Sensitivity', 'Specificity', 'PPV', 'NPV']
