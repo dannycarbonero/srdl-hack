@@ -35,12 +35,13 @@ post_center_s = 0.05
 batch_size = 32
 epochs = 128
 
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_' + str(epochs) + '_epochs_val_1/', make = True)
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_' + str(epochs) + '_epochs_val_1/lr_decrease/', make = True)
 
 #%% train
 for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
 
     model = load_RippleNet('scc')
+    model.optimizer.learning_rate = model.optimizer.learning_rate * 0.5
 
     print('Training on subject %i of %i' %(i, len(LOO_subjects)))
 

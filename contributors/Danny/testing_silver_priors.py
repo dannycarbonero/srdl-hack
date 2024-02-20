@@ -60,7 +60,7 @@ event_probabilities = []
 labels = []
 predictions_aggregate = []
 
-model = keras.models.load_model(network_directory + 'RippleNet_tuned_optimal_priors.h5')
+model = keras.models.load_model(network_directory + 'RippleNet_tuned_priors.h5')
 model.summary()
 
 with open(network_directory + 'val_frame.pkl', 'rb') as file:
