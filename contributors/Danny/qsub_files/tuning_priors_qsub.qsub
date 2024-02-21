@@ -21,4 +21,4 @@ cd /projectnb/ecog/dcarbo/srdl-hack/contributors/Danny/
 
 module load miniconda
 conda activate SRDL
-python tuning_silver_priors_final.py
+python tuning_priors.py
