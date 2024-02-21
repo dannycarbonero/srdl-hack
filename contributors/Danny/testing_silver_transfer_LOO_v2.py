@@ -62,7 +62,7 @@ predictions_aggregate = []
 
 for subject in LOO_subjects:
 
-    model = keras.models.load_model(network_directory + 'RippleNet_tuned_optimal_' + subject + '.h5')
+    model = keras.models.load_model(network_directory + 'RippleNet_tuned_' + subject + '.h5')
     model.summary()
 
     with open(network_directory + subject + '_val_frame.pkl', 'rb') as file:

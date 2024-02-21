@@ -35,13 +35,15 @@ post_center_s = 0.05
 batch_size = 32
 epochs = 128
 
-network_save_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_' + str(epochs) + '_epochs_val_2b/batch_decrease', make = True)
-network_load_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(epochs) + '_epochs_2a/batch_decrease', make = True)
+network_save_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_' + str(epochs) + '_epochs_val_2b/lr_reinc', make = True)
+network_load_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(epochs) + '_epochs_2a/lr_decrease', make = True)
 
 #%% train
 for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
 
     model = keras.models.load_model(network_load_directory + 'RippleNet_tuned_priors.h5')
+    model.optimizer.learning_rate = model.optimizer.learning_rate * 2
+
 
     print('Training on subject %i of %i' %(i, len(LOO_subjects)))
 
