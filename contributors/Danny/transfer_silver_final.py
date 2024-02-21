@@ -42,7 +42,7 @@ network_load_directory = get_parent_path('data', subdirectory = 'Spike Ripples/s
 for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
 
     model = keras.models.load_model(network_load_directory + 'RippleNet_tuned_priors.h5')
-    model.optimizer.learning_rate = model.optimizer.learning_rate * 2
+    model.optimizer.learning_rate = model.optimizer.learning_rate * 4
 
 
     print('Training on subject %i of %i' %(i, len(LOO_subjects)))
