@@ -26,7 +26,7 @@ data_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver')
 with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_val_1')
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_val_1/lr_decrease')
 # figure_directory ='figures/LOO_tuning_val_1/'
 # Path(figure_directory).mkdir(exist_ok = True)
 
@@ -103,10 +103,10 @@ paired_classifications_cum, predictions_bin_cum = classify_continuous_prediction
 
 paired_classifications_50, predictions_bin_50 = classify_continuous_predictions(np.vstack(predictions_aggregate), np.concatenate(classifications), np.vstack(labels), 0.5, width, distance)
 
-sens_agg, spec_agg, ppv_agg, npv_agg = calculate_prediction_statistics(np.concatenate(paired_classifications), np.concatenate(predictions_bin))
-sens_opt, spec_opt, ppv_opt, npv_opt = calculate_prediction_statistics(paired_classifications_cum, predictions_bin_cum)
-sens_50, spec_50, ppv_50, npv_50 = calculate_prediction_statistics(paired_classifications_50, predictions_bin_50)
-prediction_statistics = np.vstack(((sens_50, spec_50, ppv_50, npv_50), (sens_agg, spec_agg, ppv_agg, npv_agg), (sens_opt, spec_opt, ppv_opt, npv_opt)))
+sens_agg, spec_agg, ppv_agg, npv_agg, accuracy_agg = calculate_prediction_statistics(np.concatenate(paired_classifications), np.concatenate(predictions_bin))
+sens_opt, spec_opt, ppv_opt, npv_opt, accuracy_opt = calculate_prediction_statistics(paired_classifications_cum, predictions_bin_cum)
+sens_50, spec_50, ppv_50, npv_50, accuracy_50 = calculate_prediction_statistics(paired_classifications_50, predictions_bin_50)
+prediction_statistics = np.vstack(((sens_50, spec_50, ppv_50, npv_50, accuracy_50), (sens_agg, spec_agg, ppv_agg, npv_agg, accuracy_agg), (sens_opt, spec_opt, ppv_opt, npv_opt, accuracy_opt)))
 
 
 #%% plotting
@@ -147,9 +147,8 @@ ax_roc.set_ylabel('True Positive Rate')
 ax_roc.legend(LOO_subjects)
 ax_roc.spines[['right', 'top']].set_visible(False)
 
-columns = ['Sensitivity', 'Specificity', 'PPV', 'NPV']
+columns = ['Sensitivity', 'Specificity', 'PPV', 'NPV', 'Accuracy']
 rows = ['$p_{0.5}$', '$p_{th}$', '$p_{opt}$']
-prediction_statistics = np.vstack(((sens_50, spec_50, ppv_50, npv_50), (sens_agg, spec_agg, ppv_agg, npv_agg), (sens_opt, spec_opt, ppv_opt, npv_opt)))
 formatted_prediction_statistics = [[f'{value:.4f}' for value in row] for row in prediction_statistics]
 
 # Adding the table at the bottom, taking up 25% of the figure

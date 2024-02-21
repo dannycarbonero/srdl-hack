@@ -226,7 +226,10 @@ def calculate_prediction_statistics(classifications, predictions):
     # Calculate Negative Predictive Value (NPV)
     npv = tn / (tn + fn) if (tn + fn) else 0
 
-    return sensitivity, specificity, ppv, npv
+    # Calculate accuracy
+    accuracy = (tp + tn) / (tp + tn + fp + fn)
+
+    return sensitivity, specificity, ppv, npv, accuracy
 
 
 

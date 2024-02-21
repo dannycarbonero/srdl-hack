@@ -39,7 +39,7 @@ post_center_s = 0.05
 batch_size = 16
 epochs = 128
 
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(epochs) + '_epochs_2a/batch_decrease/', make = True)
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(epochs) + '_epochs_2a/batch_decrease', make = True)
 
 #%% train
 
