@@ -11,7 +11,7 @@ from scipy import signal
 import matplotlib.pyplot as plt
 
 from directory_handling import get_parent_path
-from utilities import binarize_classifications, make_refined_labels, create_training_subset, generate_LOO_subjects, load_RippleNet
+from utilities import binarize_classifications, make_refined_labels, create_training_subset, generate_LOO_subjects, load_RippleNet, freeze_RippleNet
 
 #%% load Our Data
 silver_Fs = 2035 # from simulation
@@ -35,19 +35,19 @@ post_center_s = 0.05
 batch_size = 32
 epochs = 128
 
-network_save_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_' + str(epochs) + '_epochs_val_2b/1to1', make = True)
-network_load_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(epochs) + '_epochs_2a/1to1', make = True)
+network_save_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_' + str(epochs) + '_epochs_val_2b/freeze', make = True)
+network_load_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(epochs) + '_epochs_2a/freeze', make = True)
 
 #%% train
 for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
 
     model = keras.models.load_model(network_load_directory + 'RippleNet_tuned_priors.h5')
-    model.optimizer.learning_rate = model.optimizer.learning_rate * 4
+    model = freeze_RippleNet(model, [np.arange(0, len(model.layers))[-1]])
 
 
     print('Training on subject %i of %i' %(i, len(LOO_subjects)))
 
-    model_checkpoint = tf.keras.callbacks.ModelCheckpoint(network_save_directory + 'RippleNet_tuned_optimal_' + subject + '.h5', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
+    model_checkpoint = tf.keras.callbacks.ModelCheckpoint(network_save_directory + 'RippleNet_tuned_optimal_' + subject + '.h5', monitor='loss', verbose=1, save_best_only=True, mode='min')
     checkpoint_history = keras.callbacks.CSVLogger(network_save_directory + 'RippleNet_tuning_history_' + subject + '.csv')
     checkpoint_list = [model_checkpoint, checkpoint_history]
 

@@ -12,7 +12,7 @@ from scipy import signal
 import matplotlib.pyplot as plt
 
 from directory_handling import get_parent_path
-from utilities import binarize_classifications, make_refined_labels, create_training_subset, generate_LOO_subjects, load_RippleNet
+from utilities import binarize_classifications, make_refined_labels, create_training_subset, generate_LOO_subjects, load_RippleNet, freeze_RippleNet
 
 #%% load Our Data
 silver_Fs = 2035 # from simulation
@@ -39,14 +39,14 @@ post_center_s = 0.05
 batch_size = 32
 epochs = 128
 
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(epochs) + '_epochs_2a/1to1', make = True)
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(epochs) + '_epochs_2a/freeze', make = True)
 
 #%% train
 
 model = load_RippleNet('scc')
-model.optimizer.learning_rate = model.optimizer.learning_rate * 0.5
+model = freeze_RippleNet(model, [np.arange(0, len(model.layers))[-1]])
 
-model_checkpoint = tf.keras.callbacks.ModelCheckpoint(network_directory + 'RippleNet_tuned_optimal_priors.h5', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
+model_checkpoint = tf.keras.callbacks.ModelCheckpoint(network_directory + 'RippleNet_tuned_optimal_priors.h5', monitor='loss', verbose=1, save_best_only=True, mode='min')
 checkpoint_history = keras.callbacks.CSVLogger(network_directory + 'RippleNet_tuning_history_priors.csv')
 checkpoint_list = [model_checkpoint, checkpoint_history]
 

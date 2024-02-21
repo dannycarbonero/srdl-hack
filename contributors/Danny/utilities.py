@@ -301,3 +301,14 @@ def load_RippleNet(context):
     return model
 
 
+
+def freeze_RippleNet(RippleNet_model, un_freeze_indices):
+
+    for i in range(len(RippleNet_model.layers)):
+
+        if i in un_freeze_indices:
+            RippleNet_model.layers[i].trainable = True
+        else:
+            RippleNet_model.layers[i].trainable = False
+
+    return RippleNet_model
