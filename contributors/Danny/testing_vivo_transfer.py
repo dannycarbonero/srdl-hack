@@ -26,7 +26,7 @@ data_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver')
 with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_val_2b/lr_reinc')
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_val_2b/lr_decrease')
 # figure_directory ='figures/LOO_tuning_val_1/'
 # Path(figure_directory).mkdir(exist_ok = True)
 
@@ -145,6 +145,7 @@ ax_roc.set_xlim([-0.05, 1.05])
 ax_roc.scatter(operating_point_cum[0], operating_point_cum[1], color='k')
 ax_roc.set_xlabel('False Positive Rate')
 ax_roc.set_ylabel('True Positive Rate')
+ax_roc.legend(LOO_subjects)
 ax_roc.spines[['right', 'top']].set_visible(False)
 
 columns = ['Sensitivity', 'Specificity', 'PPV', 'NPV','Accuracy']
