@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import pickle as pkl
 import tensorflow as tf
+from tensorflow.keras.initializers import GlorotUniform
 from tensorflow import keras
 from scipy import signal
 from sklearn.metrics import roc_curve, confusion_matrix
@@ -312,3 +313,16 @@ def freeze_RippleNet(RippleNet_model, un_freeze_indices):
             RippleNet_model.layers[i].trainable = False
 
     return RippleNet_model
+
+
+
+def binarize_RippleNet(RippleNet_model):
+
+    RippleNet_model.layers[12].return_sequences = False
+    RippleNet_model.layers[16] = keras.layers.Dense(1, activation='sigmoid',
+                           kernel_initializer=GlorotUniform())
+
+    RippleNet_model.compile()
+
+    return RippleNet_model
+
