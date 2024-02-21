@@ -312,7 +312,6 @@ def freeze_RippleNet(RippleNet_model, un_freeze_indices):
         else:
             RippleNet_model.layers[i].trainable = False
 
-    RippleNet_model.compile()
 
     return RippleNet_model
 
