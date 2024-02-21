@@ -14,12 +14,7 @@ from scipy import signal
 import matplotlib.pyplot as plt
 
 from directory_handling import get_parent_path
-from utilities import binarize_classifications, make_refined_labels, create_training_subset, find_dataframe_overlap, generate_LOO_subjects
+from utilities import load_RippleNet, binarize_RippleNet, freeze_RippleNet
 
-RippleNet_path = get_parent_path('code', subdirectory='RippleNet')
-model_file = RippleNet_path + 'best_model.pkl'
-with open(model_file, 'rb') as f:
-    best_model = pickle.load(f)
-    print(best_model)
-
-model = keras.models.load_model(RippleNet_path + best_model['model_file'])
+RippleNet = load_RippleNet('code')
+RippleNet_bin = binarize_RippleNet(RippleNet)

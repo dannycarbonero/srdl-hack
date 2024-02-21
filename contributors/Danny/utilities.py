@@ -312,17 +312,24 @@ def freeze_RippleNet(RippleNet_model, un_freeze_indices):
         else:
             RippleNet_model.layers[i].trainable = False
 
+    RippleNet_model.compile()
+
     return RippleNet_model
 
 
 
 def binarize_RippleNet(RippleNet_model):
 
-    RippleNet_model.layers[12].return_sequences = False
-    RippleNet_model.layers[16] = keras.layers.Dense(1, activation='sigmoid',
-                           kernel_initializer=GlorotUniform())
+    layers = RippleNet_model.layers
+    layers[12].return_sequences = False
+    dense_layer = keras.layers.Dense(1, activation='sigmoid', kernel_initializer=keras.initializers.GlorotUniform())
+    layers[16] = dense_layer
+    model_bin = keras.models.Sequential(layers)
 
-    RippleNet_model.compile()
+    # Compile the new model with the same configuration
+    opt = keras.optimizers.Adam(lr = 0.01)
+    model_bin.compile(loss='binary_crossentropy', optimizer='adam', metrics=['mse'])
 
-    return RippleNet_model
+
+    return model_bin
 

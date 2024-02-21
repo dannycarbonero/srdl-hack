@@ -26,7 +26,7 @@ data_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver')
 with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_val_1/lr_decrease')
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_val_1/freeze')
 # figure_directory ='figures/LOO_tuning_val_1/'
 # Path(figure_directory).mkdir(exist_ok = True)
 
@@ -62,7 +62,7 @@ predictions_aggregate = []
 
 for subject in LOO_subjects:
 
-    model = keras.models.load_model(network_directory + 'RippleNet_tuned_optimal_' + subject + '.h5')
+    model = keras.models.load_model(network_directory + 'RippleNet_tuned_' + subject + '.h5')
     model.summary()
 
     with open(network_directory + subject + '_val_frame.pkl', 'rb') as file:
