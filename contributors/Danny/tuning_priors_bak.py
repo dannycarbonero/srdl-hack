@@ -45,6 +45,7 @@ network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver
 
 model = load_RippleNet('scc')
 model = freeze_RippleNet(model, [np.arange(0, len(model.layers))[-1]])
+model.summary()
 
 model_checkpoint = tf.keras.callbacks.ModelCheckpoint(network_directory + 'RippleNet_tuned_optimal_priors.h5', monitor='loss', verbose=1, save_best_only=True, mode='min')
 checkpoint_history = keras.callbacks.CSVLogger(network_directory + 'RippleNet_tuning_history_priors.csv')
