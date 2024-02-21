@@ -40,7 +40,7 @@ network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver
 #%% train
 for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
 
-    model = load_RippleNet('code')
+    model = load_RippleNet('scc')
     model = freeze_RippleNet(model, [np.arange(0, len(model.layers))[-1]])
 
     print('Training on subject %i of %i' %(i, len(LOO_subjects)))
