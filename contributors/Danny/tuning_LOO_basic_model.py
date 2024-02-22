@@ -34,7 +34,7 @@ post_center_s = 0.05
 
 #%% training params
 batch_size = 32
-epochs = 10
+epochs = 128
 
 network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/basic_model', make = True)
 
@@ -105,7 +105,7 @@ for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
     training_set = training_set.batch(batch_size)
 
     validation_set = tf.data.Dataset.from_tensor_slices((validation_series, validation_labels))
-    validation_set = validation_set.shuffle(validation_series.shape[0]).batch()
+    validation_set = validation_set.shuffle(validation_series.shape[0]).batch(batch_size)
 
 
     history = model.fit(training_set, epochs = epochs, callbacks = checkpoint_list, validation_data=validation_set)
