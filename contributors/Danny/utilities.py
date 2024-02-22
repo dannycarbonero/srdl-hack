@@ -210,6 +210,16 @@ def find_optimum_ROC_threshold(probabilities, labels, cost_np = 1, cost_pn = 1):
     return optimal_threshold, operating_point
 
 
+
+def binarize_predictions(probabilities, probabilitiy_threshold):
+
+    probabilities[probabilities > probabilitiy_threshold] = 1
+    probabilities[probabilities <= probabilitiy_threshold] = 0
+
+    return probabilities
+
+
+
 def calculate_prediction_statistics(classifications, predictions):
 
     # Generate confusion matrix

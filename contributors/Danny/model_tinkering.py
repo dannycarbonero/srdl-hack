@@ -9,7 +9,7 @@ def get_model():
     model.add(keras.layers.Dense(units = 1, activation = 'sigmoid'))
 
 
-    opt = keras.optimizers.Adam(lr=.01)
+    opt = keras.optimizers.Adam(lr=.1)
     model.compile(optimizer = opt, loss = 'binary_crossentropy', metrics = ['accuracy'])
 
     return model
