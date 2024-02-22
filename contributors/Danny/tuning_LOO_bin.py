@@ -33,9 +33,9 @@ post_center_s = 0.05
 
 #%% training params
 batch_size = 32
-epochs = 128
+epochs = 3
 
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_' + str(epochs) + '_epochs_val_1/freeze', make = True)
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_' + str(epochs) + '_epochs_binary', make = True)
 
 #%% train
 for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
@@ -102,13 +102,17 @@ for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
     training_labels = np.expand_dims(make_refined_labels(training_classifications, training_time_downsampled, center_s = label_center_s, pre_center_s = pre_center_s, post_center_s = post_center_s), 2)
     validation_labels = np.expand_dims(make_refined_labels(validation_classifications, validation_time_downsampled, center_s = label_center_s, pre_center_s = pre_center_s, post_center_s = post_center_s), 2)
 
+    training_labels = np.array(training_classifications_bin).reshape(-1,1)
+    validation_labels = np.array(validation_classifications_bin).reshape(-1, 1)
+
+
     # create data sets
     training_set = tf.data.Dataset.from_tensor_slices((training_series_downsampled, training_labels))
     training_set = training_set.shuffle(training_series_downsampled.shape[0])
     training_set = training_set.batch(batch_size)
 
     validation_set = tf.data.Dataset.from_tensor_slices((validation_series_downsampled, validation_labels))
-    validation_set = validation_set.shuffle(validation_series_downsampled.shape[0])
+    validation_set = validation_set.shuffle(validation_series_downsampled.shape[0]).batch(batch_size)
 
 
     history = model.fit(training_set, epochs = epochs, callbacks = checkpoint_list, validation_data=validation_set)

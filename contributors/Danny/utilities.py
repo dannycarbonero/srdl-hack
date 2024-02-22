@@ -312,6 +312,9 @@ def freeze_RippleNet(RippleNet_model, un_freeze_indices):
         else:
             RippleNet_model.layers[i].trainable = False
 
+    opt = keras.optimizers.Adam(lr=0.01)
+    RippleNet_model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['mse'])
+
 
     return RippleNet_model
 
@@ -320,9 +323,9 @@ def freeze_RippleNet(RippleNet_model, un_freeze_indices):
 def binarize_RippleNet(RippleNet_model):
 
     layers = RippleNet_model.layers
-    layers[12].return_sequences = False
+    layers[16] = keras.layers.GlobalAveragePooling1D()
     dense_layer = keras.layers.Dense(1, activation='sigmoid', kernel_initializer=keras.initializers.GlorotUniform())
-    layers[16] = dense_layer
+    layers.append(dense_layer)
     model_bin = keras.models.Sequential(layers)
 
     # Compile the new model with the same configuration
