@@ -43,7 +43,7 @@ network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver
 
 #%% train
 
-model = load_RippleNet('code')
+model = load_RippleNet('scc')
 model = binarize_RippleNet(model)
 model = freeze_RippleNet(model, [11, 15, 16])
 model.summary()
