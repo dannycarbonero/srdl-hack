@@ -26,7 +26,7 @@ data_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver')
 with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary')
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary')
 
 #%%
 LOO_subjects = generate_LOO_subjects()
@@ -52,10 +52,12 @@ event_probabilities = []
 labels = []
 predictions_aggregate = []
 
+model = keras.models.load_model(network_directory + 'RippleNet_tuned_priors.h5')
+model.summary()
+
 for subject in LOO_subjects:
 
-    model = keras.models.load_model(network_directory + 'RippleNet_tuned_' + subject + '.h5')
-    model.summary()
+
 
     with open(network_directory + subject + '_val_frame.pkl', 'rb') as file:
         validation_frame = pickle.load(file)
