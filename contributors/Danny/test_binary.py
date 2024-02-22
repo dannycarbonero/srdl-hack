@@ -26,7 +26,10 @@ data_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver')
 with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary')
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary')
+Priors = False
+LOO = True
+
 
 #%%
 LOO_subjects = generate_LOO_subjects()
@@ -52,15 +55,21 @@ event_probabilities = []
 labels = []
 predictions_aggregate = []
 
-model = keras.models.load_model(network_directory + 'RippleNet_tuned_priors.h5')
-model.summary()
+if Priors:
+    model = keras.models.load_model(network_directory + 'RippleNet_tuned_priors.h5')
+    model.summary()
+
+    with open(network_directory + 'val_frame.pkl', 'rb') as file:
+        validation_frame = pickle.load(file)
 
 for subject in LOO_subjects:
 
+    if LOO:
+        model = keras.models.load_model(network_directory + 'RippleNet_tuned_' + subject + '.h5')
+        model.summary()
 
-
-    with open(network_directory + subject + '_val_frame.pkl', 'rb') as file:
-        validation_frame = pickle.load(file)
+        with open(network_directory + subject + '_val_frame.pkl', 'rb') as file:
+            validation_frame = pickle.load(file)
 
     _, validation_data = build_data_sets(validation_frame,  cut_factor = cut_factor, silver_Fs = silver_Fs, RippleNet_Fs = RippleNet_Fs, label_center_s = label_center_s, pre_center_s = pre_center_s, post_center_s = post_center_s)
     predictions = model.predict(np.expand_dims(validation_data['series_downsampled'], axis = 2)).squeeze()
@@ -68,7 +77,7 @@ for subject in LOO_subjects:
     optimal_probability_threshold, optimal_operating_point = find_optimum_ROC_threshold(probabilities, validation_data['classifications'])
     optimal_thresholds.append(optimal_probability_threshold)
 
-    testing_frame = data.copy()[data['subject']!=subject]
+    testing_frame = data.copy()[data['subject']==subject]
     _, testing_data = build_data_sets(testing_frame,  cut_factor = cut_factor, silver_Fs = silver_Fs, RippleNet_Fs = RippleNet_Fs, label_center_s = label_center_s, pre_center_s = pre_center_s, post_center_s = post_center_s)
     predictions = model.predict(np.expand_dims(testing_data['series_downsampled'], axis = 2)).squeeze()
     probabilities = predictions.copy()
