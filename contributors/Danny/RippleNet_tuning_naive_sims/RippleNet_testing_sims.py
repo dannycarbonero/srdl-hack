@@ -26,7 +26,8 @@ model.summary()
 #%% Our Data
 Fs = 2035 # from simulation
 # data_directory = '/home/SSD 1/Neural Data/Spike Ripples/'
-data_directory = '/home/warehaus/Neural Data/Spike Ripples/naive_sim/'
+# data_directory = '/home/warehaus/Neural Data/Spike Ripples/naive_sim/'
+data_directory = 'F:/Neural Data/Spike Ripples/naive_sim/'
 
 spikes = np.array(pd.read_csv(data_directory + 'spikes_test.csv', header = None))
 spike_labels = np.zeros(spikes.shape)
