@@ -36,7 +36,7 @@ batch_size = 32
 epochs = 128
 
 network_save_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_' + str(epochs) + '_epochs_binary', make = True)
-network_load_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(epochs) + '_epochs_binary', make = True)
+network_load_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(128) + '_epochs_binary', make = True)
 
 #%% train
 for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
