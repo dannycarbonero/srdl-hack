@@ -340,8 +340,24 @@ def binarize_RippleNet(RippleNet_model):
 
     # Compile the new model with the same configuration
     opt = keras.optimizers.Adam(lr = 0.01)
-    model_bin.compile(loss='binary_crossentropy', optimizer='adam', metrics=['mse'])
+    model_bin.compile(loss='binary_crossentropy', optimizer= opt, metrics=['mse'])
 
 
     return model_bin
 
+
+
+def reset_RippleNet(RippleNet_model):
+
+    layers = RippleNet_model.layers
+    for layer in layers:
+        if hasattr(layer, 'kernel_initializer'):
+            layer.kernel.initializer.run(session=tf.compat.v1.keras.backend.get_session())
+
+    model_frozen = keras.models.Sequential(layers)
+
+    # Compile the new model with the same configuration
+    opt = keras.optimizers.Adam(lr = 0.01)
+    model_frozen.compile(loss='binary_crossentropy', optimizer= opt, metrics=['mse'])
+
+    return model_frozen
