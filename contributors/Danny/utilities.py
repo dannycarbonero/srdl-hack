@@ -352,7 +352,7 @@ def reset_RippleNet(RippleNet_model):
     layers = RippleNet_model.layers
     for layer in layers:
         if hasattr(layer, 'kernel_initializer'):
-            layer.kernel.initializer.run(session=tf.compat.v1.keras.backend.get_session())
+            layer.kernel.assign(tf.random.normal(layer.kernel.shape))
 
     model_frozen = keras.models.Sequential(layers)
 
