@@ -12,7 +12,7 @@ from scipy import signal
 import matplotlib.pyplot as plt
 
 from directory_handling import get_parent_path
-from utilities import binarize_classifications, make_refined_labels, create_training_subset, generate_LOO_subjects, load_RippleNet, binarize_RippleNet, freeze_RippleNet
+from utilities import binarize_classifications, make_refined_labels, create_training_subset, generate_LOO_subjects, load_RippleNet, binarize_RippleNet, freeze_RippleNet, reset_RippleNet
 
 #%% load Our Data
 silver_Fs = 2035 # from simulation
@@ -39,13 +39,14 @@ post_center_s = 0.05
 batch_size = 32
 epochs = 128
 
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(epochs) + '_epochs_binary', make = True)
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(epochs) + '_epochs_binary_nu', make = True)
 
 #%% train
 
 model = load_RippleNet('scc')
 model = binarize_RippleNet(model)
-model = freeze_RippleNet(model, [11, 15, 16])
+model = reset_RippleNet(model)
+# model = freeze_RippleNet(model, [11, 15, 16])
 model.summary()
 
 model_checkpoint = tf.keras.callbacks.ModelCheckpoint(network_directory + 'RippleNet_tuned_optimal_priors.h5', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
