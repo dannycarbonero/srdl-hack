@@ -1,4 +1,4 @@
-#!/bin/bash -l
+#!/bin/bash
 
 python tuning_LOO_bin.py
 python tuning_priors_bin.py
