@@ -355,6 +355,7 @@ def reset_RippleNet(RippleNet_model):
             layer.kernel.assign(tf.random.normal(layer.kernel.shape))
 
     model_frozen = keras.models.Sequential(layers)
+    model_frozen.build(input_shape=(None, 1))
 
     # Compile the new model with the same configuration
     opt = keras.optimizers.Adam(lr = 0.01)
