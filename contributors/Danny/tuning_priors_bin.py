@@ -49,7 +49,7 @@ model = binarize_RippleNet(model)
 model = freeze_RippleNet(model, [11, 15, 16])
 model.summary()
 
-model_checkpoint = tf.keras.callbacks.ModelCheckpoint(network_directory + 'RippleNet_tuned_optimal_priors.h5', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
+model_checkpoint = tf.keras.callbacks.ModelCheckpoint(network_directory + 'RippleNet_tuned_optimal_priors.h5', monitor='loss', verbose=1, save_best_only=True, mode='min')
 checkpoint_history = keras.callbacks.CSVLogger(network_directory + 'RippleNet_tuning_history_priors.csv')
 checkpoint_list = [model_checkpoint, checkpoint_history]
 shared_keys = ['classification', 'time','series']
