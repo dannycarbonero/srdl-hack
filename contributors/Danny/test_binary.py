@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = 'Arial'
 
 from directory_handling import get_parent_path
-from utilities import generate_LOO_subjects, pull_event_probabilities, build_data_sets, find_optimum_ROC_threshold, classify_continuous_predictions, calculate_prediction_statistics, binarize_predictions
+from utilities import generate_LOO_subjects, pull_event_probabilities, build_data_sets, find_optimum_ROC_threshold, load_RippleNet, binarize_RippleNet, calculate_prediction_statistics, binarize_predictions
 from pathlib import Path
 
 #%% load Our Data
@@ -28,10 +28,12 @@ with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
 
 # network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary')
 # network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary/large')
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_binary')
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_256_epochs_binary')
 
-Priors = False
+Basic = True
 LOO = True
+Priors = False
+
 
 
 #%%
@@ -64,6 +66,10 @@ if Priors:
 
     with open(network_directory + 'val_frame.pkl', 'rb') as file:
         validation_frame = pickle.load(file)
+
+if Basic:
+    model = load_RippleNet('code')
+    model = binarize_RippleNet(model)
 
 for subject in LOO_subjects:
 

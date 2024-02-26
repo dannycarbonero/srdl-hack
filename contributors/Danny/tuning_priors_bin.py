@@ -39,14 +39,14 @@ post_center_s = 0.05
 batch_size = 32
 epochs = 128
 
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(epochs) + '_epochs_binary_nu', make = True)
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(epochs) + '_epochs_binary_final', make = True)
 
 #%% train
 
 model = load_RippleNet('scc')
 model = binarize_RippleNet(model)
-model = reset_RippleNet(model)
-# model = freeze_RippleNet(model, [11, 15, 16])
+# model = reset_RippleNet(model)
+model = freeze_RippleNet(model, [11, 15, 16])
 model.summary()
 
 model_checkpoint = tf.keras.callbacks.ModelCheckpoint(network_directory + 'RippleNet_tuned_optimal_priors.h5', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
