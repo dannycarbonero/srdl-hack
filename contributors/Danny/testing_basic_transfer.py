@@ -148,14 +148,12 @@ columns = ['Sensitivity', 'Specificity', 'PPV', 'NPV', 'Accuracy']
 rows = ['$p_{0.5}$', '$p_{validation}$', '$p_{opt}$']
 formatted_prediction_statistics = [[f'{value:.4f}' for value in row] for row in prediction_statistics]
 
-table_data = [columns]  # Header row
-table_data.extend([[row_label] + row for row_label, row in zip(rows, formatted_prediction_statistics)])
 
 import csv
 csv_filename = "prediction_statistics_basic.csv"
 with open(csv_filename, 'w', newline='') as csvfile:
     writer = csv.writer(csvfile)
-    writer.writerows(table_data)
+    writer.writerows(formatted_prediction_statistics)
 
 
 plt.tight_layout()

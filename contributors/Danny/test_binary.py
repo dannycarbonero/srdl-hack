@@ -29,12 +29,12 @@ with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
 # network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final')
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_final')
-# network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_binary_final')
+# network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_final')
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_binary_final')
 
 Basic = False
-LOO = False
-Priors = True
+LOO = True
+Priors = False
 
 
 
@@ -144,20 +144,19 @@ ax_roc.scatter(operating_point_cum[0], operating_point_cum[1], color='r', s = 65
 ax_roc.set_xlabel('False Positive Rate', fontsize = 14)
 ax_roc.set_ylabel('True Positive Rate', fontsize = 14)
 ax_roc.spines[['right', 'top']].set_visible(False)
-ax_roc.set_title(f'Priors Tuning, auc: {AUC_ROC_curve_cum:.4f}')
+ax_roc.set_title(f'LOO Transfer, auc: {AUC_ROC_curve_cum:.4f}')
 
 columns = ['Sensitivity', 'Specificity', 'PPV', 'NPV', 'Accuracy']
 rows = ['$p_{0.5}$', '$p_{validation}$', '$p_{opt}$']
 formatted_prediction_statistics = [[f'{value:.4f}' for value in row] for row in prediction_statistics]
 
-table_data = [columns]  # Header row
-table_data.extend([[row_label] + row for row_label, row in zip(rows, formatted_prediction_statistics)])
+
 
 import csv
-csv_filename = "prediction_statistics_priors_bin.csv"
+csv_filename = "prediction_statistics_transfer_bin.csv"
 with open(csv_filename, 'w', newline='') as csvfile:
     writer = csv.writer(csvfile)
-    writer.writerows(table_data)
+    writer.writerows(formatted_prediction_statistics)
 
 
 # # Adding the table at the bottom, taking up 25% of the figure
@@ -170,5 +169,5 @@ with open(csv_filename, 'w', newline='') as csvfile:
 # tbl.scale(1, 1.5)  # You may adjust these scaling factors as needed
 
 plt.tight_layout()
-fig.savefig('priors_bin.svg')
+fig.savefig('transfer_bin.svg')
 fig.show()
