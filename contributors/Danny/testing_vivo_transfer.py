@@ -14,6 +14,7 @@ from sklearn import metrics
 
 import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = 'Arial'
+plt.rcParams.update({'font.size': 14})
 
 from directory_handling import get_parent_path
 from utilities import generate_LOO_subjects, pull_event_probabilities, build_data_sets, find_optimum_ROC_threshold, classify_continuous_predictions, calculate_prediction_statistics
@@ -98,6 +99,7 @@ for subject in LOO_subjects:
 #%% cummulative statistics
 optimal_probability_threshold_cum, operating_point_cum = find_optimum_ROC_threshold(np.concatenate(event_probabilities),np.concatenate(classifications))
 ROC_curve_cum = metrics.roc_curve(np.concatenate(classifications), np.concatenate(event_probabilities))
+AUC_ROC_curve_cum = metrics.roc_auc_score(np.concatenate(classifications), np.concatenate(event_probabilities))
 paired_classifications_cum, predictions_bin_cum = classify_continuous_predictions(np.vstack(predictions_aggregate), np.concatenate(classifications), np.vstack(labels), optimal_probability_threshold_cum, width, distance)
 
 
@@ -134,34 +136,39 @@ prediction_statistics = np.vstack(((sens_50, spec_50, ppv_50, npv_50, accuracy_5
 
 fig = plt.figure(figsize=(10/1.5, 8/1.5))
 
+
 # Adding ROC plot
-ax_roc = plt.subplot2grid((4, 1), (0, 0), rowspan=3, fig=fig)  # Allocate 3/4 of the figure to ROC
+ax_roc = plt.subplot2grid((4, 1), (0, 0), rowspan=4, fig=fig)  # Allocate 3/4 of the figure to ROC
 for i in range(len(ROC_statistics)):
     ax_roc.plot(ROC_statistics[i][0], ROC_statistics[i][1], alpha=0.66)
 ax_roc.plot(ROC_curve_cum[0], ROC_curve_cum[1], color='k')
 ax_roc.plot(np.linspace(-1, 2, 100), np.linspace(-1, 2, 100), color='k', linestyle='--')
 ax_roc.set_ylim([-0.05, 1.05])
 ax_roc.set_xlim([-0.05, 1.05])
-ax_roc.scatter(operating_point_cum[0], operating_point_cum[1], color='k')
-ax_roc.set_xlabel('False Positive Rate')
-ax_roc.set_ylabel('True Positive Rate')
+ax_roc.scatter(operating_point_cum[0], operating_point_cum[1], color='r', s = 65)
+ax_roc.set_xlabel('False Positive Rate', fontsize = 14)
+ax_roc.set_ylabel('True Positive Rate', fontsize = 14)
 ax_roc.legend(LOO_subjects)
 ax_roc.spines[['right', 'top']].set_visible(False)
+ax_roc.set_title(f'No Tuning, auc: {AUC_ROC_curve_cum:.4f}')
 
-columns = ['Sensitivity', 'Specificity', 'PPV', 'NPV','Accuracy']
-rows = ['$p_{0.5}$', '$p_{th}$', '$p_{opt}$']
+columns = ['Sensitivity', 'Specificity', 'PPV', 'NPV', 'Accuracy']
+rows = ['$p_{0.5}$', '$p_{validation}$', '$p_{opt}$']
 formatted_prediction_statistics = [[f'{value:.4f}' for value in row] for row in prediction_statistics]
 
-# Adding the table at the bottom, taking up 25% of the figure
-ax_table = plt.subplot2grid((4, 1), (3, 0), fig=fig)
-ax_table.axis('tight')
-ax_table.axis('off')
-tbl = ax_table.table(cellText=formatted_prediction_statistics, rowLabels=rows, colLabels=columns, loc='center', cellLoc='center')
-tbl.auto_set_font_size(False)
-tbl.set_fontsize(10)
-tbl.scale(1, 1.5)  # You may adjust these scaling factors as needed
+table_data = [columns]  # Header row
+table_data.extend([[row_label] + row for row_label, row in zip(rows, formatted_prediction_statistics)])
+
+import csv
+csv_filename = "prediction_statistics_basic.csv"
+with open(csv_filename, 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerows(table_data)
+
 
 plt.tight_layout()
+fig.savefig('no_tuning.svg')
 fig.show()
+
 
 #%% THEIR DATA - check RippleNet_path/RippleNet_interactive_prototype.ipynb
