@@ -43,7 +43,7 @@ for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
 
     model = keras.models.load_model(network_load_directory + 'RippleNet_tuned_priors.h5')
 
-    print('Training on subject %i of %i' %(i, len(LOO_subjects)))
+    print('Training on subject %i of %i' %(i+1, len(LOO_subjects)))
 
     model_checkpoint = tf.keras.callbacks.ModelCheckpoint(network_save_directory + 'RippleNet_tuned_optimal_' + subject + '.h5', monitor='loss', verbose=1, save_best_only=True, mode='min')
     checkpoint_history = keras.callbacks.CSVLogger(network_save_directory + 'RippleNet_tuning_history_' + subject + '.csv')

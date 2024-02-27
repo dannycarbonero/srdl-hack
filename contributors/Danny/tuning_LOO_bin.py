@@ -33,7 +33,7 @@ post_center_s = 0.05
 
 #%% training params
 batch_size = 32
-epochs = 3
+epochs = 128
 
 network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_' + str(epochs) + '_epochs_binary_final', make = True)
 
@@ -46,7 +46,7 @@ for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
     model.summary()
 
 
-    print('Training on subject %i of %i' %(i, len(LOO_subjects)))
+    print('Training on subject %i of %i' %(i+1, len(LOO_subjects)))
 
     model_checkpoint = tf.keras.callbacks.ModelCheckpoint(network_directory + 'RippleNet_tuned_optimal_' + subject + '.h5', monitor='loss', verbose=1, save_best_only=True, mode='min')
     checkpoint_history = keras.callbacks.CSVLogger(network_directory + 'RippleNet_tuning_history_' + subject + '.csv')

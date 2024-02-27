@@ -20,17 +20,17 @@ from utilities import generate_LOO_subjects, pull_event_probabilities, build_dat
 from pathlib import Path
 
 #%% load Our Data
-silver_Fs = 2035 # from simulation
+silver_Fs = 2035 # from simulation q
 data_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver')
 
 with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
-# network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary')
-# network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary/large')
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_256_epochs_binary')
+# network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final')
+# network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_nu')
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_256_epochs_binary_final')
 
-Basic = True
+Basic = False
 LOO = True
 Priors = False
 
