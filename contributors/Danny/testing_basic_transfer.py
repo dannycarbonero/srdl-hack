@@ -56,6 +56,10 @@ classifications = []
 event_probabilities = []
 labels = []
 predictions_aggregate = []
+optimal_thresholds = []
+statistics_th = []
+statistics_50 = []
+
 
 model = load_RippleNet('code')
 
@@ -68,11 +72,16 @@ for subject in LOO_subjects:
     predictions = model.predict(np.expand_dims(testing_data['series_downsampled'], axis = 2)).squeeze()
     probabilities = pull_event_probabilities(predictions, testing_data['time_downsampled'], window_bounds)
     optimal_probability_threshold,_ = find_optimum_ROC_threshold(probabilities, testing_data['classifications'])
+    optimal_thresholds.append(optimal_probability_threshold)
     event_probabilities.append(probabilities)
     predictions_aggregate.append(predictions)
 
     paired_classifications_working, predictions_bin_working = classify_continuous_predictions(predictions, testing_data['classifications'], testing_data['labels'], optimal_probability_threshold, width, distance)
+    statistics_th.append(calculate_prediction_statistics(paired_classifications_working, predictions_bin_working))
     ROC_statistics.append(metrics.roc_curve(testing_data['classifications'], probabilities))
+
+    paired_classifications_50, predictions_bin_50 = classify_continuous_predictions(predictions, testing_data['classifications'], testing_data['labels'], 0.5, width, distance)
+    statistics_50.append(calculate_prediction_statistics(paired_classifications_50, predictions_bin_50))
 
 
     confusion_matrices.append(metrics.confusion_matrix(paired_classifications_working, predictions_bin_working).ravel())  # tn, fp, fn, tp
@@ -85,14 +94,6 @@ for subject in LOO_subjects:
     predictions_bin.append(predictions_bin_working)
 
 #%% cummulative statistics
-statistics_th = []
-statistics_50 = []
-
-for prediction_set, classification_set, event_probability_set, optimal_probability_set in zip(predictions_bin, classifications, event_probabilities, optimal_thresholds):
-    predictions_bin_50_working = classify_continuous_predictions(prediction_set, 0.5)
-    statistics_50.append(calculate_prediction_statistics(predictions_bin_50_working, classification_set))
-
-    statistics_th.append(calculate_prediction_statistics(classification_set, prediction_set))
 
 
 statistics_50 = np.vstack(statistics_50)
@@ -108,11 +109,11 @@ columns = ['Column 1', 'Column 2', 'Column 3', 'Column 4', 'Column 5']
 mean_std_columns = pd.MultiIndex.from_product([columns, ['Mean', 'StdDev']])
 
 data = {
-    'Column 1': [(mean_50[0], std_50[0]), (mean_th[0], std_th[0])],
-    'Column 2': [(mean_50[1], std_50[1]), (mean_th[1], std_th[1])],
-    'Column 3': [(mean_50[2], std_50[2]), (mean_th[2], std_th[2])],
-    'Column 4': [(mean_50[3], std_50[3]), (mean_th[3], std_th[3])],
-    'Column 5': [(mean_50[4], std_50[4]), (mean_th[4], std_th[4])]
+    'Column 1': [f'{mean_50[0]:.4f} ({std_50[0]:.4f})', f'{mean_th[0]:.4f} ({std_th[0]:.4f})'],
+    'Column 2': [f'{mean_50[1]:.4f} ({std_50[1]:.4f})', f'{mean_th[1]:.4f} ({std_th[1]:.4f})'],
+    'Column 3': [f'{mean_50[2]:.4f} ({std_50[2]:.4f})', f'{mean_th[2]:.4f} ({std_th[2]:.4f})'],
+    'Column 4': [f'{mean_50[3]:.4f} ({std_50[3]:.4f})', f'{mean_th[3]:.4f} ({std_th[3]:.4f})'],
+    'Column 5': [f'{mean_50[4]:.4f} ({std_50[4]:.4f})', f'{mean_th[4]:.4f} ({std_th[4]:.4f})']
 }
 
 df = pd.DataFrame(data)

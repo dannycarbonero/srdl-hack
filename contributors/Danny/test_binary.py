@@ -29,15 +29,15 @@ with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
 # network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final')
-# network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_final')
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_binary_final')
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_final')
+# network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_binary_final')
 
 Basic = False
-LOO = True
-Priors = False
+LOO = False
+Priors = True
 
-prefix = 'Transfer'
-plot_title = 'LOO Transfer'
+prefix = 'priors'
+plot_title = 'Priors Tuning'
 
 #%%
 LOO_subjects = generate_LOO_subjects()
@@ -62,6 +62,8 @@ classifications = []
 event_probabilities = []
 labels = []
 predictions_aggregate = []
+statistics_th = []
+statistics_50 = []
 
 if Priors:
     model = keras.models.load_model(network_directory + 'RippleNet_tuned_priors.h5')
@@ -99,6 +101,12 @@ for subject in LOO_subjects:
     paired_classifications_working = testing_data['classifications']
     predictions_bin_working = binarize_predictions(probabilities.copy(), optimal_probability_threshold)
 
+    statistics_th.append((calculate_prediction_statistics(paired_classifications_working, predictions_bin_working)))
+
+    predictions_bin_50_working = binarize_predictions(probabilities.copy(), 0.5)
+    statistics_50.append(calculate_prediction_statistics(paired_classifications_working, predictions_bin_50_working))
+
+
     ROC_statistics.append(metrics.roc_curve(testing_data['classifications'], probabilities))
 
 
@@ -114,14 +122,6 @@ for subject in LOO_subjects:
 
 #%% cummulative statistics
 
-statistics_th = []
-statistics_50 = []
-
-for prediction_set, classification_set, event_probability_set, optimal_probability_set in zip(predictions_bin, classifications, event_probabilities, optimal_thresholds):
-    predictions_bin_50_working = binarize_predictions(prediction_set, 0.5)
-    statistics_50.append(calculate_prediction_statistics(predictions_bin_50_working, classification_set))
-
-    statistics_th.append(calculate_prediction_statistics(classification_set, prediction_set))
 
 statistics_50 = np.vstack(statistics_50)
 statistics_th = np.vstack(statistics_th)
@@ -143,11 +143,11 @@ columns = ['Column 1', 'Column 2', 'Column 3', 'Column 4', 'Column 5']
 mean_std_columns = pd.MultiIndex.from_product([columns, ['Mean', 'StdDev']])
 
 data = {
-    'Column 1': [(mean_50[0], std_50[0]), (mean_th[0], std_th[0])],
-    'Column 2': [(mean_50[1], std_50[1]), (mean_th[1], std_th[1])],
-    'Column 3': [(mean_50[2], std_50[2]), (mean_th[2], std_th[2])],
-    'Column 4': [(mean_50[3], std_50[3]), (mean_th[3], std_th[3])],
-    'Column 5': [(mean_50[4], std_50[4]), (mean_th[4], std_th[4])]
+    'Column 1': [f'{mean_50[0]:.4f} ({std_50[0]:.4f})', f'{mean_th[0]:.4f} ({std_th[0]:.4f})'],
+    'Column 2': [f'{mean_50[1]:.4f} ({std_50[1]:.4f})', f'{mean_th[1]:.4f} ({std_th[1]:.4f})'],
+    'Column 3': [f'{mean_50[2]:.4f} ({std_50[2]:.4f})', f'{mean_th[2]:.4f} ({std_th[2]:.4f})'],
+    'Column 4': [f'{mean_50[3]:.4f} ({std_50[3]:.4f})', f'{mean_th[3]:.4f} ({std_th[3]:.4f})'],
+    'Column 5': [f'{mean_50[4]:.4f} ({std_50[4]:.4f})', f'{mean_th[4]:.4f} ({std_th[4]:.4f})']
 }
 
 df = pd.DataFrame(data)
