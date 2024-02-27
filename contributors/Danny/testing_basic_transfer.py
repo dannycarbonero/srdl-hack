@@ -85,6 +85,41 @@ for subject in LOO_subjects:
     predictions_bin.append(predictions_bin_working)
 
 #%% cummulative statistics
+statistics_th = []
+statistics_50 = []
+
+for prediction_set, classification_set, event_probability_set, optimal_probability_set in zip(predictions_bin, classifications, event_probabilities, optimal_thresholds):
+    predictions_bin_50_working = classify_continuous_predictions(prediction_set, 0.5)
+    statistics_50.append(calculate_prediction_statistics(predictions_bin_50_working, classification_set))
+
+    statistics_th.append(calculate_prediction_statistics(classification_set, prediction_set))
+
+
+statistics_50 = np.vstack(statistics_50)
+statistics_th = np.vstack(statistics_th)
+
+mean_50 = np.nanmean(statistics_50, axis=0)
+std_50 = np.nanstd(statistics_50, axis=0)
+
+mean_th = np.mean(statistics_th, axis=0)
+std_th = np.std(statistics_th, axis=0)
+
+columns = ['Column 1', 'Column 2', 'Column 3', 'Column 4', 'Column 5']
+mean_std_columns = pd.MultiIndex.from_product([columns, ['Mean', 'StdDev']])
+
+data = {
+    'Column 1': [(mean_50[0], std_50[0]), (mean_th[0], std_th[0])],
+    'Column 2': [(mean_50[1], std_50[1]), (mean_th[1], std_th[1])],
+    'Column 3': [(mean_50[2], std_50[2]), (mean_th[2], std_th[2])],
+    'Column 4': [(mean_50[3], std_50[3]), (mean_th[3], std_th[3])],
+    'Column 5': [(mean_50[4], std_50[4]), (mean_th[4], std_th[4])]
+}
+
+df = pd.DataFrame(data)
+
+# Write the DataFrame to a CSV file
+df.to_csv('statistics_basic.csv', index=False)
+
 optimal_probability_threshold_cum, operating_point_cum = find_optimum_ROC_threshold(np.concatenate(event_probabilities),np.concatenate(classifications))
 ROC_curve_cum = metrics.roc_curve(np.concatenate(classifications), np.concatenate(event_probabilities))
 AUC_ROC_curve_cum = metrics.roc_auc_score(np.concatenate(classifications), np.concatenate(event_probabilities))
@@ -157,7 +192,7 @@ with open(csv_filename, 'w', newline='') as csvfile:
 
 
 plt.tight_layout()
-fig.savefig('priorstitle_tuning.svg')
+fig.savefig('basic.svg')
 fig.show()
 
 

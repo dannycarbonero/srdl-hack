@@ -36,7 +36,8 @@ Basic = False
 LOO = True
 Priors = False
 
-
+prefix = 'Transfer'
+plot_title = 'LOO Transfer'
 
 #%%
 LOO_subjects = generate_LOO_subjects()
@@ -76,7 +77,7 @@ if Basic:
 for subject in LOO_subjects:
 
     if LOO:
-        model = keras.models.load_model(network_directory + 'RippleNet_tuned_' + subject + '.h5')
+        model = keras.models.load_model(network_directory + 'RippleNet_tuned_optimal_' + subject + '.h5')
         model.summary()
 
         with open(network_directory + subject + '_val_frame.pkl', 'rb') as file:
@@ -112,6 +113,48 @@ for subject in LOO_subjects:
 
 
 #%% cummulative statistics
+
+statistics_th = []
+statistics_50 = []
+
+for prediction_set, classification_set, event_probability_set, optimal_probability_set in zip(predictions_bin, classifications, event_probabilities, optimal_thresholds):
+    predictions_bin_50_working = binarize_predictions(prediction_set, 0.5)
+    statistics_50.append(calculate_prediction_statistics(predictions_bin_50_working, classification_set))
+
+    statistics_th.append(calculate_prediction_statistics(classification_set, prediction_set))
+
+statistics_50 = np.vstack(statistics_50)
+statistics_th = np.vstack(statistics_th)
+
+mean_50 = np.nanmean(statistics_50, axis=0)
+std_50 = np.nanstd(statistics_50, axis=0)
+
+mean_th = np.mean(statistics_th, axis=0)
+std_th = np.std(statistics_th, axis=0)
+
+mean_50 = np.round(mean_50, 4)
+std_50 = np.round(std_50, 4)
+
+mean_th = np.round(mean_th, 4)
+std_th = np.round(std_th, 4)
+
+
+columns = ['Column 1', 'Column 2', 'Column 3', 'Column 4', 'Column 5']
+mean_std_columns = pd.MultiIndex.from_product([columns, ['Mean', 'StdDev']])
+
+data = {
+    'Column 1': [(mean_50[0], std_50[0]), (mean_th[0], std_th[0])],
+    'Column 2': [(mean_50[1], std_50[1]), (mean_th[1], std_th[1])],
+    'Column 3': [(mean_50[2], std_50[2]), (mean_th[2], std_th[2])],
+    'Column 4': [(mean_50[3], std_50[3]), (mean_th[3], std_th[3])],
+    'Column 5': [(mean_50[4], std_50[4]), (mean_th[4], std_th[4])]
+}
+
+df = pd.DataFrame(data)
+
+# Write the DataFrame to a CSV file
+df.to_csv('statistics_' + prefix + '.csv', index=False)
+
 optimal_probability_threshold_cum, operating_point_cum = find_optimum_ROC_threshold(np.concatenate(event_probabilities),np.concatenate(classifications))
 ROC_curve_cum = metrics.roc_curve(np.concatenate(classifications), np.concatenate(event_probabilities))
 AUC_ROC_curve_cum = metrics.roc_auc_score(np.concatenate(classifications), np.concatenate(event_probabilities))
@@ -144,7 +187,7 @@ ax_roc.scatter(operating_point_cum[0], operating_point_cum[1], color='r', s = 65
 ax_roc.set_xlabel('False Positive Rate', fontsize = 14)
 ax_roc.set_ylabel('True Positive Rate', fontsize = 14)
 ax_roc.spines[['right', 'top']].set_visible(False)
-ax_roc.set_title(f'LOO Transfer, auc: {AUC_ROC_curve_cum:.4f}')
+ax_roc.set_title(f'{plot_title}, auc: {AUC_ROC_curve_cum:.4f}')
 
 columns = ['Sensitivity', 'Specificity', 'PPV', 'NPV', 'Accuracy']
 rows = ['$p_{0.5}$', '$p_{validation}$', '$p_{opt}$']
@@ -153,7 +196,7 @@ formatted_prediction_statistics = [[f'{value:.4f}' for value in row] for row in 
 
 
 import csv
-csv_filename = "prediction_statistics_transfer_bin.csv"
+csv_filename = "prediction_statistics_" + prefix + "_bin.csv"
 with open(csv_filename, 'w', newline='') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerows(formatted_prediction_statistics)
@@ -169,5 +212,5 @@ with open(csv_filename, 'w', newline='') as csvfile:
 # tbl.scale(1, 1.5)  # You may adjust these scaling factors as needed
 
 plt.tight_layout()
-fig.savefig('transfer_bin.svg')
+fig.savefig(prefix + '_bin.svg')
 fig.show()
