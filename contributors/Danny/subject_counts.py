@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FixedLocator
 import seaborn as sns
 from utilities import generate_LOO_subjects
-from brokenaxes import brokenaxes
 
 #%%
 data_directory = get_parent_path('data', 'Spike Ripples/silver')

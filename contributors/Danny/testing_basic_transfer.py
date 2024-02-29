@@ -59,6 +59,7 @@ predictions_aggregate = []
 optimal_thresholds = []
 statistics_th = []
 statistics_50 = []
+ROC_aucs = []
 
 
 model = load_RippleNet('code')
@@ -79,6 +80,7 @@ for subject in LOO_subjects:
     paired_classifications_working, predictions_bin_working = classify_continuous_predictions(predictions, testing_data['classifications'], testing_data['labels'], optimal_probability_threshold, width, distance)
     statistics_th.append(calculate_prediction_statistics(paired_classifications_working, predictions_bin_working))
     ROC_statistics.append(metrics.roc_curve(testing_data['classifications'], probabilities))
+    ROC_aucs.append(metrics.roc_auc_score(testing_data['classifications'], probabilities))
 
     paired_classifications_50, predictions_bin_50 = classify_continuous_predictions(predictions, testing_data['classifications'], testing_data['labels'], 0.5, width, distance)
     statistics_50.append(calculate_prediction_statistics(paired_classifications_50, predictions_bin_50))
@@ -119,7 +121,7 @@ data = {
 df = pd.DataFrame(data)
 
 # Write the DataFrame to a CSV file
-df.to_csv('statistics_basic.csv', index=False)
+# df.to_csv('statistics_basic.csv', index=False)
 
 optimal_probability_threshold_cum, operating_point_cum = find_optimum_ROC_threshold(np.concatenate(event_probabilities),np.concatenate(classifications))
 ROC_curve_cum = metrics.roc_curve(np.concatenate(classifications), np.concatenate(event_probabilities))
@@ -184,17 +186,17 @@ columns = ['Sensitivity', 'Specificity', 'PPV', 'NPV', 'Accuracy']
 rows = ['$p_{0.5}$', '$p_{validation}$', '$p_{opt}$']
 formatted_prediction_statistics = [[f'{value:.4f}' for value in row] for row in prediction_statistics]
 
-
-import csv
-csv_filename = "prediction_statistics_basic.csv"
-with open(csv_filename, 'w', newline='') as csvfile:
-    writer = csv.writer(csvfile)
-    writer.writerows(formatted_prediction_statistics)
+#
+# import csv
+# csv_filename = "prediction_statistics_basic.csv"
+# with open(csv_filename, 'w', newline='') as csvfile:
+#     writer = csv.writer(csvfile)
+#     writer.writerows(formatted_prediction_statistics)
 
 
 plt.tight_layout()
-fig.savefig('basic.svg')
-fig.show()
+# fig.savefig('basic.svg')
+# fig.show()
 
 
 #%% THEIR DATA - check RippleNet_path/RippleNet_interactive_prototype.ipynb

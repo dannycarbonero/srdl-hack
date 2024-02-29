@@ -64,6 +64,7 @@ labels = []
 predictions_aggregate = []
 statistics_th = []
 statistics_50 = []
+ROC_aucs = []
 
 if Priors:
     model = keras.models.load_model(network_directory + 'RippleNet_tuned_priors.h5')
@@ -108,7 +109,7 @@ for subject in LOO_subjects:
 
 
     ROC_statistics.append(metrics.roc_curve(testing_data['classifications'], probabilities))
-
+    ROC_aucs.append(metrics.roc_auc_score(testing_data['classifications'], probabilities))
 
 
     confusion_matrices.append(metrics.confusion_matrix(paired_classifications_working, predictions_bin_working).ravel())  # tn, fp, fn, tp
@@ -153,7 +154,7 @@ data = {
 df = pd.DataFrame(data)
 
 # Write the DataFrame to a CSV file
-df.to_csv('statistics_' + prefix + '.csv', index=False)
+# df.to_csv('statistics_' + prefix + '.csv', index=False)
 
 optimal_probability_threshold_cum, operating_point_cum = find_optimum_ROC_threshold(np.concatenate(event_probabilities),np.concatenate(classifications))
 ROC_curve_cum = metrics.roc_curve(np.concatenate(classifications), np.concatenate(event_probabilities))
@@ -195,11 +196,11 @@ formatted_prediction_statistics = [[f'{value:.4f}' for value in row] for row in 
 
 
 
-import csv
-csv_filename = "prediction_statistics_" + prefix + "_bin.csv"
-with open(csv_filename, 'w', newline='') as csvfile:
-    writer = csv.writer(csvfile)
-    writer.writerows(formatted_prediction_statistics)
+# import csv
+# csv_filename = "prediction_statistics_" + prefix + "_bin.csv"
+# with open(csv_filename, 'w', newline='') as csvfile:
+#     writer = csv.writer(csvfile)
+#     writer.writerows(formatted_prediction_statistics)
 
 
 # # Adding the table at the bottom, taking up 25% of the figure
@@ -212,5 +213,10 @@ with open(csv_filename, 'w', newline='') as csvfile:
 # tbl.scale(1, 1.5)  # You may adjust these scaling factors as needed
 
 plt.tight_layout()
-fig.savefig(prefix + '_bin.svg')
-fig.show()
+# fig.savefig(prefix + '_bin.svg')
+# fig.show()
+
+
+ROC_aucs = np.array(ROC_aucs)
+print(np.mean(ROC_aucs))
+print(np.std(ROC_aucs))
