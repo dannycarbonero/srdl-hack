@@ -172,7 +172,6 @@ ax_roc.plot(ROC_curve_cum[0], ROC_curve_cum[1], color='k')
 ax_roc.plot(np.linspace(-1, 2, 100), np.linspace(-1, 2, 100), color='k', linestyle='--')
 ax_roc.set_ylim([-0.05, 1.05])
 ax_roc.set_xlim([-0.05, 1.05])
-ax_roc.scatter(operating_point_cum[0], operating_point_cum[1], color='r', s = 65)
 ax_roc.set_xlabel('False Positive Rate', fontsize = 14)
 ax_roc.set_ylabel('True Positive Rate', fontsize = 14)
 
@@ -180,7 +179,7 @@ LOO_subjects = [subject[-3:] for subject in LOO_subjects]
 LOO_subjects.append('Combined')
 ax_roc.legend(LOO_subjects)
 ax_roc.spines[['right', 'top']].set_visible(False)
-ax_roc.set_title(f'Priors Tuning, auc: {AUC_ROC_curve_cum:.4f}')
+ax_roc.set_title(f'No Tuning')
 
 columns = ['Sensitivity', 'Specificity', 'PPV', 'NPV', 'Accuracy']
 rows = ['$p_{0.5}$', '$p_{validation}$', '$p_{opt}$']
@@ -195,8 +194,8 @@ formatted_prediction_statistics = [[f'{value:.4f}' for value in row] for row in 
 
 
 plt.tight_layout()
-# fig.savefig('basic.svg')
-# fig.show()
+fig.savefig('basic.svg')
+fig.show()
 
 
 #%% THEIR DATA - check RippleNet_path/RippleNet_interactive_prototype.ipynb

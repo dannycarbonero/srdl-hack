@@ -29,15 +29,17 @@ with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
 # network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final')
-# network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_final')
-# network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_binary')
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_final')
+# network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_binary_final')
 
 Basic = False
-LOO = True
-Priors = False
+LOO = False
+Priors = True
 
 prefix = 'priors'
-plot_title = 'Priors Tuning'
+# plot_title = ('$\\mathit{In}$ $\\mathit{vivo}$ data alone')
+plot_title = 'Synthetic Data Alone'
+# plot_title = ('Synthetic + $\\mathit{in}$ $\\mathit{vivo}$ data')
 
 #%%
 LOO_subjects = generate_LOO_subjects()
@@ -184,11 +186,11 @@ ax_roc.plot(ROC_curve_cum[0], ROC_curve_cum[1], color='k')
 ax_roc.plot(np.linspace(-1, 2, 100), np.linspace(-1, 2, 100), color='k', linestyle='--')
 ax_roc.set_ylim([-0.05, 1.05])
 ax_roc.set_xlim([-0.05, 1.05])
-ax_roc.scatter(operating_point_cum[0], operating_point_cum[1], color='r', s = 65)
+# ax_roc.scatter(operating_point_cum[0], operating_point_cum[1], color='r', s = 65)
 ax_roc.set_xlabel('False Positive Rate', fontsize = 14)
 ax_roc.set_ylabel('True Positive Rate', fontsize = 14)
 ax_roc.spines[['right', 'top']].set_visible(False)
-ax_roc.set_title(f'{plot_title}, auc: {AUC_ROC_curve_cum:.4f}')
+ax_roc.set_title(plot_title)
 
 columns = ['Sensitivity', 'Specificity', 'PPV', 'NPV', 'Accuracy']
 rows = ['$p_{0.5}$', '$p_{validation}$', '$p_{opt}$']
@@ -213,7 +215,7 @@ formatted_prediction_statistics = [[f'{value:.4f}' for value in row] for row in 
 # tbl.scale(1, 1.5)  # You may adjust these scaling factors as needed
 
 plt.tight_layout()
-# fig.savefig(prefix + '_bin.svg')
+fig.savefig(prefix + '_bin.svg')
 fig.show()
 
 
