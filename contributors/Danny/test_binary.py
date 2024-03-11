@@ -28,21 +28,18 @@ data_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver')
 with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
-# epochs notes 128, 128, 256
 # network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final')
-# network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_final')
-# network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_binary')
-
-# network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary')
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_512_epochs_binary')
-
-
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_final')
+# network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_binary_final')
 
 Basic = False
-LOO = True
-Priors = False
+LOO = False
+Priors = True
 
-plot_title = ' '
+prefix = 'priors'
+# plot_title = ('$\\mathit{In}$ $\\mathit{vivo}$ data alone')
+plot_title = 'Synthetic Data Alone'
+# plot_title = ('Synthetic + $\\mathit{in}$ $\\mathit{vivo}$ data')
 
 #%%
 LOO_subjects = generate_LOO_subjects()
@@ -127,6 +124,40 @@ for subject in LOO_subjects:
 
 
 #%% cummulative statistics
+
+
+statistics_50 = np.vstack(statistics_50)
+statistics_th = np.vstack(statistics_th)
+
+mean_50 = np.nanmean(statistics_50, axis=0)
+std_50 = np.nanstd(statistics_50, axis=0)
+
+mean_th = np.mean(statistics_th, axis=0)
+std_th = np.std(statistics_th, axis=0)
+
+mean_50 = np.round(mean_50, 4)
+std_50 = np.round(std_50, 4)
+
+mean_th = np.round(mean_th, 4)
+std_th = np.round(std_th, 4)
+
+
+columns = ['Column 1', 'Column 2', 'Column 3', 'Column 4', 'Column 5']
+mean_std_columns = pd.MultiIndex.from_product([columns, ['Mean', 'StdDev']])
+
+data = {
+    'Column 1': [f'{mean_50[0]:.4f} ({std_50[0]:.4f})', f'{mean_th[0]:.4f} ({std_th[0]:.4f})'],
+    'Column 2': [f'{mean_50[1]:.4f} ({std_50[1]:.4f})', f'{mean_th[1]:.4f} ({std_th[1]:.4f})'],
+    'Column 3': [f'{mean_50[2]:.4f} ({std_50[2]:.4f})', f'{mean_th[2]:.4f} ({std_th[2]:.4f})'],
+    'Column 4': [f'{mean_50[3]:.4f} ({std_50[3]:.4f})', f'{mean_th[3]:.4f} ({std_th[3]:.4f})'],
+    'Column 5': [f'{mean_50[4]:.4f} ({std_50[4]:.4f})', f'{mean_th[4]:.4f} ({std_th[4]:.4f})']
+}
+
+df = pd.DataFrame(data)
+
+# Write the DataFrame to a CSV file
+# df.to_csv('statistics_' + prefix + '.csv', index=False)
+
 optimal_probability_threshold_cum, operating_point_cum = find_optimum_ROC_threshold(np.concatenate(event_probabilities),np.concatenate(classifications))
 ROC_curve_cum = metrics.roc_curve(np.concatenate(classifications), np.concatenate(event_probabilities))
 AUC_ROC_curve_cum = metrics.roc_auc_score(np.concatenate(classifications), np.concatenate(event_probabilities))
@@ -148,18 +179,18 @@ fig = plt.figure(figsize=(10/1.5, 8/1.5))
 plt.rcParams['font.sans-serif'] = ['Arial']
 
 # Adding ROC plot
-ax_roc = plt.subplot2grid((4, 1), (0, 0), rowspan=3, fig=fig)  # Allocate 3/4 of the figure to ROC
+ax_roc = plt.subplot2grid((4, 1), (0, 0), rowspan=4, fig=fig)  # Allocate 3/4 of the figure to ROC
 for i in range(len(ROC_statistics)):
     ax_roc.plot(ROC_statistics[i][0], ROC_statistics[i][1], alpha=0.66)
 ax_roc.plot(ROC_curve_cum[0], ROC_curve_cum[1], color='k')
 ax_roc.plot(np.linspace(-1, 2, 100), np.linspace(-1, 2, 100), color='k', linestyle='--')
 ax_roc.set_ylim([-0.05, 1.05])
 ax_roc.set_xlim([-0.05, 1.05])
-ax_roc.scatter(operating_point_cum[0], operating_point_cum[1], color='r', s = 65)
+# ax_roc.scatter(operating_point_cum[0], operating_point_cum[1], color='r', s = 65)
 ax_roc.set_xlabel('False Positive Rate', fontsize = 14)
 ax_roc.set_ylabel('True Positive Rate', fontsize = 14)
 ax_roc.spines[['right', 'top']].set_visible(False)
-ax_roc.set_title(f'{plot_title}, auc: {AUC_ROC_curve_cum:.4f}')
+ax_roc.set_title(plot_title)
 
 columns = ['Sensitivity', 'Specificity', 'PPV', 'NPV', 'Accuracy']
 rows = ['$p_{0.5}$', '$p_{validation}$', '$p_{opt}$']
@@ -167,14 +198,27 @@ formatted_prediction_statistics = [[f'{value:.4f}' for value in row] for row in 
 
 
 
-# Adding the table at the bottom, taking up 25% of the figure
-ax_table = plt.subplot2grid((4, 1), (3, 0), fig=fig)
-ax_table.axis('tight')
-ax_table.axis('off')
-tbl = ax_table.table(cellText=formatted_prediction_statistics, rowLabels=rows, colLabels=columns, loc='center', cellLoc='center')
-tbl.auto_set_font_size(False)
-tbl.set_fontsize(10)
-tbl.scale(1, 1.5)  # You may adjust these scaling factors as needed
+# import csv
+# csv_filename = "prediction_statistics_" + prefix + "_bin.csv"
+# with open(csv_filename, 'w', newline='') as csvfile:
+#     writer = csv.writer(csvfile)
+#     writer.writerows(formatted_prediction_statistics)
+
+
+# # Adding the table at the bottom, taking up 25% of the figure
+# # ax_table = plt.subplot2grid((4, 1), (3, 0), fig=fig)
+# ax_table.axis('tight')
+# ax_table.axis('off')
+# tbl = ax_table.table(cellText=formatted_prediction_statistics, rowLabels=rows, colLabels=columns, loc='center', cellLoc='center')
+# tbl.auto_set_font_size(False)
+# tbl.set_fontsize(10)
+# tbl.scale(1, 1.5)  # You may adjust these scaling factors as needed
 
 plt.tight_layout()
+fig.savefig(prefix + '_bin.svg')
 fig.show()
+
+
+ROC_aucs = np.array(ROC_aucs)
+print(np.mean(ROC_aucs))
+print(np.std(ROC_aucs))

@@ -17,6 +17,8 @@ LOO_subjects = generate_LOO_subjects()
 for subject in LOO_subjects:
     y_counts.append(len(data[(data['subject'] == subject) & (data['classification'] == 'y')]))
 
+bk_counts
+
 
 data['subject'] = data['subject'].apply(lambda x: x if x in LOO_subjects else 'Others Agg.')
 LOO_subjects = [subject[-3:] for subject in LOO_subjects]
