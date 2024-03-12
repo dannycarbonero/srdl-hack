@@ -17,13 +17,22 @@ LOO_subjects = generate_LOO_subjects()
 for subject in LOO_subjects:
     y_counts.append(len(data[(data['subject'] == subject) & (data['classification'] == 'y')]))
 
-bk_counts
 
-
-data['subject'] = data['subject'].apply(lambda x: x if x in LOO_subjects else 'Others Agg.')
-LOO_subjects = [subject[-3:] for subject in LOO_subjects]
 
 #%%
+bk_frame = data[data['classification'] == 'bk']
+bk_counts = len(bk_frame)
+working_bk = []
+for subject in LOO_subjects:
+    working_bk.append(len(bk_frame[bk_frame['subject'] != subject]))
+
+
+
+#%%
+data['subject'] = data['subject'].apply(lambda x: x if x in LOO_subjects else 'Others Agg.')
+LOO_subjects = [subject[-3:] for subject in LOO_subjects]
+labels = ['s0', 's1', 's2', 's3', 's4', 's5', 's6']
+
 plt.rcParams['font.family'] = 'Arial'
 plt.rcParams.update({'font.size': 14})
 fig = plt.figure(dpi = 300)
@@ -31,8 +40,8 @@ ax = fig.add_subplot(111)
 ax = sns.histplot(data = data, x = 'subject', hue = 'classification', multiple = 'stack')
 ax.tick_params(axis='x', rotation=45)
 legend_entries = ['Others Agg.']
-legend_entries.extend(LOO_subjects)
-ax.set_xticklabels(legend_entries)
+legend_entries.extend(labels)
+ax.set_xticklabels(labels)
 ax.spines[['right', 'top']].set_visible(False)
 ax.set_xlabel('Subject')
 ax.yaxis.set_major_locator(FixedLocator([0, 350, 1100]))
