@@ -177,7 +177,8 @@ ax_roc.set_ylabel('True Positive Rate', fontsize = 14)
 
 LOO_subjects = [subject[-3:] for subject in LOO_subjects]
 LOO_subjects.append('Combined')
-ax_roc.legend(LOO_subjects)
+ax_roc.legend(['S1','S2','S3','S4','S5','S6','Combined'])
+# ax_roc.legend(LOO_subjects)
 ax_roc.spines[['right', 'top']].set_visible(False)
 ax_roc.set_title(f'No Tuning')
 

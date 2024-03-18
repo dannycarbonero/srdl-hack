@@ -31,7 +31,7 @@ for subject in LOO_subjects:
 #%%
 data['subject'] = data['subject'].apply(lambda x: x if x in LOO_subjects else 'Others Agg.')
 LOO_subjects = [subject[-3:] for subject in LOO_subjects]
-labels = ['s0', 's1', 's2', 's3', 's4', 's5', 's6']
+labels = ['S0', 'S1', 'S2', 'S3', 'S4', 'S5', 'S6']
 
 plt.rcParams['font.family'] = 'Arial'
 plt.rcParams.update({'font.size': 14})
