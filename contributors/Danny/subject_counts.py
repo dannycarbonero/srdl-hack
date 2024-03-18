@@ -12,6 +12,9 @@ data_directory = get_parent_path('data', 'Spike Ripples/silver')
 with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
+unique_subjects = data['subject'].nunique()
+print("Unique subjects:", unique_subjects)
+
 y_counts = []
 LOO_subjects = generate_LOO_subjects()
 for subject in LOO_subjects:
@@ -26,6 +29,11 @@ working_bk = []
 for subject in LOO_subjects:
     working_bk.append(len(bk_frame[bk_frame['subject'] != subject]))
 
+
+#%%
+data['classification'] = data['classification'].replace('bk', 'background')
+data['classification'] = data['classification'].replace('y', 'spike ripple')
+data['classification'] = data['classification'].replace('n', 'spike')
 
 
 #%%
@@ -52,4 +60,3 @@ fig.savefig('subject_counts.tif')
 fig.show()
 
 #%%
-
