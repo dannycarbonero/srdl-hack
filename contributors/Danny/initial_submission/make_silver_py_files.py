@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import pickle as pkl
-from contributors.Danny.initial_submission.directory_handling import get_parent_path
+from directory_handling import get_parent_path
 
 #%%
 load_path = get_parent_path('data', subdirectory = 'Spike Ripples/silver/data_csvs')

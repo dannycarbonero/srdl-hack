@@ -1,9 +1,9 @@
-from contributors.Danny.initial_submission.directory_handling import get_parent_path
+from directory_handling import get_parent_path
 import pickle
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FixedLocator
 import seaborn as sns
-from contributors.Danny.initial_submission.utilities import generate_LOO_subjects
+from utilities import generate_LOO_subjects
 
 #%%
 data_directory = get_parent_path('data', 'Spike Ripples/silver')

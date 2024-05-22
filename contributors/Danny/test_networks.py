@@ -11,10 +11,11 @@ import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = 'Arial'
 plt.rcParams.update({'font.size': 14})  # Set the default font size to 12
 
-from contributors.Danny.initial_submission.utilities import build_data_sets, find_optimum_ROC_threshold, load_RippleNet, binarize_RippleNet, calculate_prediction_statistics, binarize_predictions
+from directory_handling import get_parent_path
+from utilities import build_data_sets, find_optimum_ROC_threshold, load_RippleNet, binarize_RippleNet, calculate_prediction_statistics, binarize_predictions, generate_LOO_subjects
 
 #%% function to return statistics, and ROC axis
-def test_network(data, LOO_subjects, network_load_directory = None, Basic = False, LOO = False, Priors = False):
+def test_network(data, LOO_subjects, network_load_directory = None, Basic = False, LOO = False, Priors = False, fig = None, subplot_dimensions = None, i = None):
 
     # some constants
     silver_Fs = 2035  # from simulation q
@@ -27,10 +28,11 @@ def test_network(data, LOO_subjects, network_load_directory = None, Basic = Fals
     window_bounds = [label_center_s - pre_center_s, label_center_s + post_center_s]
 
     #%% initialize variables
-    paired_classifications = []
     predictions_bin = []
+    paired_classifications = []
     optimal_thresholds = []
     ROC_statistics = []
+    ROC_aucs = []
     confusion_matrices = []
     classifications = []
     event_probabilities = []
@@ -38,7 +40,6 @@ def test_network(data, LOO_subjects, network_load_directory = None, Basic = Fals
     predictions_aggregate = []
     statistics_th = []
     statistics_50 = []
-    ROC_aucs = []
 
     if Basic:
         model = load_RippleNet('code')
@@ -46,16 +47,17 @@ def test_network(data, LOO_subjects, network_load_directory = None, Basic = Fals
 
     if Priors:
         model = keras.models.load_model(network_load_directory + 'RippleNet_tuned_priors.h5')
-        model.summary()
 
         with open(network_load_directory + 'val_frame.pkl', 'rb') as file:
             validation_frame = pickle.load(file)
 
     for subject in LOO_subjects:
 
+        if Basic:
+            validation_frame = data.copy()[data['subject'] != subject]
+
         if LOO:
             model = keras.models.load_model(network_load_directory + 'RippleNet_tuned_optimal_' + subject + '.h5')
-            model.summary()
 
             with open(network_load_directory + subject + '_val_frame.pkl', 'rb') as file:
                 validation_frame = pickle.load(file)
@@ -98,3 +100,60 @@ def test_network(data, LOO_subjects, network_load_directory = None, Basic = Fals
         paired_classifications.append(paired_classifications_working)
         predictions_bin.append(predictions_bin_working)
 
+
+    statistics_50 = np.vstack(statistics_50)
+    statistics_th = np.vstack(statistics_th)
+
+    optimal_probability_threshold_cum, operating_point_cum = find_optimum_ROC_threshold(np.concatenate(event_probabilities), np.concatenate(classifications))
+    ROC_curve_cum = metrics.roc_curve(np.concatenate(classifications), np.concatenate(event_probabilities))
+    AUC_ROC_curve_cum = metrics.roc_auc_score(np.concatenate(classifications), np.concatenate(event_probabilities))
+
+    if fig:
+        ax = fig.add_subplot(subplot_dimensions[0], subplot_dimensions[1], i+1)
+        ax_roc = plt.subplot2grid((4, 1), (0, 0), rowspan=4, fig=fig)  # Allocate 3/4 of the figure to ROC
+        for j in range(len(ROC_statistics)):
+            ax_roc.plot(ROC_statistics[j][0], ROC_statistics[j][1], alpha=0.66)
+        ax_roc.plot(ROC_curve_cum[0], ROC_curve_cum[1], color='k')
+        ax_roc.plot(np.linspace(-1, 2, 100), np.linspace(-1, 2, 100), color='k', linestyle='--')
+        ax_roc.set_ylim([-0.05, 1.05])
+        ax_roc.set_xlim([-0.05, 1.05])
+        # ax_roc.scatter(operating_point_cum[0], operating_point_cum[1], color='r', s = 65)
+        ax_roc.set_xlabel('False Positive Rate', fontsize=14)
+        ax_roc.set_ylabel('True Positive Rate', fontsize=14)
+        ax_roc.spines[['right', 'top']].set_visible(False)
+        if i+1 == 0:
+            ax.legend({})
+            ax_roc.legend(['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'Combined'])
+        if i+1 == 0:
+            ax.set_title('No tuning')
+        elif i+1 == 1:
+            ax.set_title(r'\textit{In vivo} data alone')
+        elif i+1 == 2:
+            ax.set_title('Synthetic Data Alone')
+        elif i+1 == 3:
+            ax.set_title(r'Synthetic + \textit{in vivo} data alone')
+
+
+    return statistics_50, statistics_th, fig
+
+
+
+#%%
+
+data_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver')
+
+with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
+    data = pickle.load(file)
+
+LOO_subjects = generate_LOO_subjects()
+
+network_directories  = [get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final'),
+                        get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_final'),
+                        get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_binary_final')]
+
+fig = plt.figure()
+variables = []
+variables.append(test_network(data, LOO_subjects, Basic = True, fig = fig, subplot_dimensions = (2,2), i = 0))
+variables.append(test_network(data, LOO_subjects, LOO = True, fig = variables[0][2], subplot_dimensions = (2,2), i = 1, network_load_directory = network_directories[0]))
+variables.append(test_network(data, LOO_subjects, Priors = True, fig = variables[1][2], subplot_dimensions = (2,2), i = 2, network_load_directory = network_directories[1]))
+variables.append(test_network(data, LOO_subjects, LOO = True, fig = variables[2][2], subplot_dimensions = (2,2), i = 3, network_load_directory = network_directories[2]))

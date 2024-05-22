@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import h5py
-from contributors.Danny.initial_submission.utilities import get_parent_path
+from utilities import get_parent_path
 
 mouse = True
 rat = True

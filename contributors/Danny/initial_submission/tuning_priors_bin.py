@@ -9,8 +9,8 @@ import pickle
 import pandas as pd
 from scipy import signal
 
-from contributors.Danny.initial_submission.directory_handling import get_parent_path
-from contributors.Danny.initial_submission.utilities import binarize_classifications, make_refined_labels, load_RippleNet, binarize_RippleNet, freeze_RippleNet
+from directory_handling import get_parent_path
+from utilities import binarize_classifications, make_refined_labels, load_RippleNet, binarize_RippleNet, freeze_RippleNet
 
 #%% load Our Data
 silver_Fs = 2035 # from simulation

@@ -11,8 +11,8 @@ from sklearn import metrics
 import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = 'Arial'
 
-from contributors.Danny.initial_submission.directory_handling import get_parent_path
-from contributors.Danny.initial_submission.utilities import generate_LOO_subjects, pull_event_probabilities, build_data_sets, find_optimum_ROC_threshold, classify_continuous_predictions, calculate_prediction_statistics
+from directory_handling import get_parent_path
+from utilities import generate_LOO_subjects, pull_event_probabilities, build_data_sets, find_optimum_ROC_threshold, classify_continuous_predictions, calculate_prediction_statistics
 
 #%% load Our Data
 silver_Fs = 2035 # from simulation

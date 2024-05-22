@@ -13,8 +13,8 @@ plt.rcParams['font.family'] = 'Arial'
 plt.rcParams.update({'font.size': 14})  # Set the default font size to 12
 
 
-from contributors.Danny.initial_submission.directory_handling import get_parent_path
-from contributors.Danny.initial_submission.utilities import generate_LOO_subjects, build_data_sets, find_optimum_ROC_threshold, load_RippleNet, binarize_RippleNet, calculate_prediction_statistics, binarize_predictions
+from directory_handling import get_parent_path
+from utilities import generate_LOO_subjects, build_data_sets, find_optimum_ROC_threshold, load_RippleNet, binarize_RippleNet, calculate_prediction_statistics, binarize_predictions
 
 #%% load Our Data
 silver_Fs = 2035 # from simulation q

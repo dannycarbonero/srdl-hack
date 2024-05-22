@@ -8,8 +8,8 @@ import pickle
 import pandas as pd
 from scipy import signal
 
-from contributors.Danny.initial_submission.directory_handling import get_parent_path
-from contributors.Danny.initial_submission.utilities import binarize_classifications, make_refined_labels, create_training_subset, generate_LOO_subjects, \
+from directory_handling import get_parent_path
+from utilities import binarize_classifications, make_refined_labels, create_training_subset, generate_LOO_subjects, \
     freeze_RippleNet
 
 #%% load Our Data
