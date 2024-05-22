@@ -4,14 +4,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
-import h5py
 import pickle
 import pandas as pd
 from scipy import signal
-import matplotlib.pyplot as plt
 
-from directory_handling import get_parent_path
-from utilities import binarize_classifications, make_refined_labels, create_training_subset, generate_LOO_subjects, load_RippleNet, freeze_RippleNet
+from contributors.Danny.initial_submission.directory_handling import get_parent_path
+from contributors.Danny.initial_submission.utilities import binarize_classifications, make_refined_labels, create_training_subset, generate_LOO_subjects
 
 #%% load Our Data
 silver_Fs = 2035 # from simulation
@@ -19,6 +17,7 @@ data_path = get_parent_path('data', subdirectory ='Spike Ripples/silver')
 
 with open(data_path + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
+
 
 #%% define LOO subjects
 LOO_subjects = generate_LOO_subjects()

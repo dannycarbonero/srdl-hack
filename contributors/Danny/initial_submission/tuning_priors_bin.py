@@ -5,14 +5,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 import tensorflow as tf
 from tensorflow import keras
-import h5py
 import pickle
 import pandas as pd
 from scipy import signal
-import matplotlib.pyplot as plt
 
-from directory_handling import get_parent_path
-from utilities import binarize_classifications, make_refined_labels, create_training_subset, generate_LOO_subjects, load_RippleNet
+from contributors.Danny.initial_submission.directory_handling import get_parent_path
+from contributors.Danny.initial_submission.utilities import binarize_classifications, make_refined_labels, load_RippleNet, binarize_RippleNet, freeze_RippleNet
 
 #%% load Our Data
 silver_Fs = 2035 # from simulation
@@ -39,35 +37,48 @@ post_center_s = 0.05
 batch_size = 32
 epochs = 128
 
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(epochs) + '_epochs_2a/1to1', make = True)
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(epochs) + '_epochs_binary_final', make = True)
 
 #%% train
-
 model = load_RippleNet('scc')
+model = binarize_RippleNet(model)
+# model = reset_RippleNet(model)
+model = freeze_RippleNet(model, [11, 15, 16])
+model.summary()
 
-model_checkpoint = tf.keras.callbacks.ModelCheckpoint(network_directory + 'RippleNet_tuned_optimal_priors.h5', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
+model_checkpoint = tf.keras.callbacks.ModelCheckpoint(network_directory + 'RippleNet_tuned_optimal_priors.h5', monitor='loss', verbose=1, save_best_only=True, mode='min')
 checkpoint_history = keras.callbacks.CSVLogger(network_directory + 'RippleNet_tuning_history_priors.csv')
 checkpoint_list = [model_checkpoint, checkpoint_history]
-
-vivo_y_frame = data[data['classification'] == 'y']
-vivo_bk_frame = data[data['classification'] == 'bk']
-priors_frame_y = data_priors[data_priors['classification'] == 'y']
-priors_frame_n = data_priors[data_priors['classification'] == 'n']
-
-
-# pull data
 shared_keys = ['classification', 'time','series']
-
-training_frame_y = data_priors[data_priors['classification'] == 'y'].sample(vivo_y_frame.shape[0])[shared_keys]
-training_frame_n = data_priors[data_priors['classification'] == 'n'].sample(int(vivo_y_frame.shape[0]/2))[shared_keys]
-training_frame_bk = data[data['classification'] == 'bk'].sample(int(vivo_y_frame.shape[0]/2))[shared_keys]
-
-validation_frame_y = priors_frame_y.loc[priors_frame_y.index.difference(training_frame_y.index)].sample(int(vivo_y_frame.shape[0]*.1))[shared_keys]
-validation_frame_n = priors_frame_n.loc[priors_frame_n.index.difference(training_frame_n.index)].sample(int(vivo_y_frame.shape[0]*.05))[shared_keys]
-validation_frame_bk = vivo_bk_frame.loc[vivo_bk_frame.index.difference(training_frame_bk.index)].sample(int(vivo_y_frame.shape[0]*.05))[shared_keys]
-
+training_frame_y = data_priors[data_priors['classification'] == 'y'][shared_keys]
+training_frame_bk = data[data['classification'] == 'bk'][shared_keys]
+validation_frame_bk = training_frame_bk.sample(n = int(training_frame_bk.shape[0] * 0.1))[shared_keys]
+training_frame_bk = training_frame_bk.loc[training_frame_bk.index.difference(validation_frame_bk.index)]
+training_frame_n = data_priors[data_priors['classification'] == 'n'].sample(n = int(training_frame_y.shape[0] - training_frame_bk.shape[0]))[shared_keys]
 training_frame = pd.concat((training_frame_y, training_frame_y, training_frame_bk))
+validation_frame_n = val_priors[val_priors['classification'] == 'n'].sample(n = int(val_priors.shape[0]/2 - validation_frame_bk.shape[0]))[shared_keys]
+validation_frame_y = val_priors[val_priors['classification']== 'y'][shared_keys]
 validation_frame = pd.concat((validation_frame_y, validation_frame_n, validation_frame_bk))
+
+# vivo_y_frame = data[data['classification'] == 'y']
+# vivo_bk_frame = data[data['classification'] == 'bk']
+# priors_frame_y = data_priors[data_priors['classification'] == 'y']
+# priors_frame_n = data_priors[data_priors['classification'] == 'n']
+#
+#
+# # pull data
+# shared_keys = ['classification', 'time','series']
+#
+# training_frame_y = data_priors[data_priors['classification'] == 'y'].sample(vivo_y_frame.shape[0])[shared_keys]
+# training_frame_n = data_priors[data_priors['classification'] == 'n'].sample(int(vivo_y_frame.shape[0]/2))[shared_keys]
+# training_frame_bk = data[data['classification'] == 'bk'].sample(int(vivo_y_frame.shape[0]/2))[shared_keys]
+#
+# validation_frame_y = priors_frame_y.loc[priors_frame_y.index.difference(training_frame_y.index)].sample(int(vivo_y_frame.shape[0]*.1))[shared_keys]
+# validation_frame_n = priors_frame_n.loc[priors_frame_n.index.difference(training_frame_n.index)].sample(int(vivo_y_frame.shape[0]*.05))[shared_keys]
+# validation_frame_bk = vivo_bk_frame.loc[vivo_bk_frame.index.difference(training_frame_bk.index)].sample(int(vivo_y_frame.shape[0]*.05))[shared_keys]
+#
+# training_frame = pd.concat((training_frame_y, training_frame_y, training_frame_bk))
+# validation_frame = pd.concat((validation_frame_y, validation_frame_n, validation_frame_bk))
 
 with open(network_directory + 'val_frame.pkl', 'wb') as file:
     pickle.dump(validation_frame, file)
@@ -108,13 +119,16 @@ validation_time_downsampled = signal.resample(training_time, int(RippleNet_Fs / 
 training_labels = np.expand_dims(make_refined_labels(training_classifications, training_time_downsampled, center_s = label_center_s, pre_center_s = pre_center_s, post_center_s = post_center_s), 2)
 validation_labels = np.expand_dims(make_refined_labels(validation_classifications, validation_time_downsampled, center_s = label_center_s, pre_center_s = pre_center_s, post_center_s = post_center_s), 2)
 
+# training_labels = np.array(training_classifications_bin).reshape(-1, 1)
+# validation_labels = np.array(validation_classifications_bin).reshape(-1, 1)
+
 # create data sets
 training_set = tf.data.Dataset.from_tensor_slices((training_series_downsampled, training_labels))
 training_set = training_set.shuffle(training_series_downsampled.shape[0])
 training_set = training_set.batch(batch_size)
 
 validation_set = tf.data.Dataset.from_tensor_slices((validation_series_downsampled, validation_labels))
-validation_set = validation_set.shuffle(validation_series_downsampled.shape[0])
+validation_set = validation_set.shuffle(validation_series_downsampled.shape[0]).batch(batch_size)
 
 
 history = model.fit(training_set, epochs = epochs, callbacks = checkpoint_list, validation_data=validation_set)

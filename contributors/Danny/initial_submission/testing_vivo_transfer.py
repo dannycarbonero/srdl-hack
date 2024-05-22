@@ -3,21 +3,17 @@ import numpy as np
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-import tensorflow as tf
 from tensorflow import keras
-import h5py
 import pickle
-import pandas as pd
-from scipy import signal
 from sklearn import metrics
 
 
 import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = 'Arial'
-plt.rcParams.update({'font.size': 14})  # Set
-from directory_handling import get_parent_path
-from utilities import generate_LOO_subjects, pull_event_probabilities, build_data_sets, find_optimum_ROC_threshold, classify_continuous_predictions, calculate_prediction_statistics, load_RippleNet
-from pathlib import Path
+plt.rcParams.update({'font.size': 14})
+
+from contributors.Danny.initial_submission.directory_handling import get_parent_path
+from contributors.Danny.initial_submission.utilities import generate_LOO_subjects, pull_event_probabilities, build_data_sets, find_optimum_ROC_threshold, classify_continuous_predictions, calculate_prediction_statistics
 
 #%% load Our Data
 silver_Fs = 2035 # from simulation
@@ -26,6 +22,9 @@ data_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver')
 with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_val_2b/freeze')
+# figure_directory ='figures/LOO_tuning_val_1/'
+# Path(figure_directory).mkdir(exist_ok = True)
 
 #%%
 #LOO_subjects = [generate_LOO_subjects()[-1]] # LOO for current augmenting is 43
@@ -56,34 +55,31 @@ classifications = []
 event_probabilities = []
 labels = []
 predictions_aggregate = []
-optimal_thresholds = []
-statistics_th = []
-statistics_50 = []
-ROC_aucs = []
-
-
-model = load_RippleNet('code')
-
 
 for subject in LOO_subjects:
 
+    model = keras.models.load_model(network_directory + 'RippleNet_tuned_' + subject + '.h5')
+    model.summary()
+
+    with open(network_directory + subject + '_val_frame.pkl', 'rb') as file:
+        validation_frame = pickle.load(file)
+
+    _, validation_data = build_data_sets(validation_frame,  cut_factor = cut_factor, silver_Fs = silver_Fs, RippleNet_Fs = RippleNet_Fs, label_center_s = label_center_s, pre_center_s = pre_center_s, post_center_s = post_center_s)
+    predictions = model.predict(np.expand_dims(validation_data['series_downsampled'], axis = 2)).squeeze()
+    probabilities = pull_event_probabilities(predictions, validation_data['time_downsampled'], window_bounds)
+    optimal_probability_threshold, optimal_operating_point = find_optimum_ROC_threshold(probabilities, validation_data['classifications'])
+    optimal_thresholds.append(optimal_probability_threshold)
 
     testing_frame = data.copy()[data['subject']==subject]
     _, testing_data = build_data_sets(testing_frame,  cut_factor = cut_factor, silver_Fs = silver_Fs, RippleNet_Fs = RippleNet_Fs, label_center_s = label_center_s, pre_center_s = pre_center_s, post_center_s = post_center_s)
     predictions = model.predict(np.expand_dims(testing_data['series_downsampled'], axis = 2)).squeeze()
     probabilities = pull_event_probabilities(predictions, testing_data['time_downsampled'], window_bounds)
-    optimal_probability_threshold,_ = find_optimum_ROC_threshold(probabilities, testing_data['classifications'])
-    optimal_thresholds.append(optimal_probability_threshold)
     event_probabilities.append(probabilities)
     predictions_aggregate.append(predictions)
 
     paired_classifications_working, predictions_bin_working = classify_continuous_predictions(predictions, testing_data['classifications'], testing_data['labels'], optimal_probability_threshold, width, distance)
-    statistics_th.append(calculate_prediction_statistics(paired_classifications_working, predictions_bin_working))
     ROC_statistics.append(metrics.roc_curve(testing_data['classifications'], probabilities))
-    ROC_aucs.append(metrics.roc_auc_score(testing_data['classifications'], probabilities))
 
-    paired_classifications_50, predictions_bin_50 = classify_continuous_predictions(predictions, testing_data['classifications'], testing_data['labels'], 0.5, width, distance)
-    statistics_50.append(calculate_prediction_statistics(paired_classifications_50, predictions_bin_50))
 
 
     confusion_matrices.append(metrics.confusion_matrix(paired_classifications_working, predictions_bin_working).ravel())  # tn, fp, fn, tp
@@ -96,37 +92,9 @@ for subject in LOO_subjects:
     predictions_bin.append(predictions_bin_working)
 
 #%% cummulative statistics
-
-
-statistics_50 = np.vstack(statistics_50)
-statistics_th = np.vstack(statistics_th)
-
-mean_50 = np.nanmean(statistics_50, axis=0)
-std_50 = np.nanstd(statistics_50, axis=0)
-
-mean_th = np.mean(statistics_th, axis=0)
-std_th = np.std(statistics_th, axis=0)
-
-columns = ['Column 1', 'Column 2', 'Column 3', 'Column 4', 'Column 5']
-mean_std_columns = pd.MultiIndex.from_product([columns, ['Mean', 'StdDev']])
-
-data = {
-    'Column 1': [f'{mean_50[0]:.4f} ({std_50[0]:.4f})', f'{mean_th[0]:.4f} ({std_th[0]:.4f})'],
-    'Column 2': [f'{mean_50[1]:.4f} ({std_50[1]:.4f})', f'{mean_th[1]:.4f} ({std_th[1]:.4f})'],
-    'Column 3': [f'{mean_50[2]:.4f} ({std_50[2]:.4f})', f'{mean_th[2]:.4f} ({std_th[2]:.4f})'],
-    'Column 4': [f'{mean_50[3]:.4f} ({std_50[3]:.4f})', f'{mean_th[3]:.4f} ({std_th[3]:.4f})'],
-    'Column 5': [f'{mean_50[4]:.4f} ({std_50[4]:.4f})', f'{mean_th[4]:.4f} ({std_th[4]:.4f})']
-}
-
-df = pd.DataFrame(data)
-
-# Write the DataFrame to a CSV file
-# df.to_csv('statistics_basic.csv', index=False)
-
 optimal_probability_threshold_cum, operating_point_cum = find_optimum_ROC_threshold(np.concatenate(event_probabilities),np.concatenate(classifications))
 ROC_curve_cum = metrics.roc_curve(np.concatenate(classifications), np.concatenate(event_probabilities))
 AUC_ROC_curve_cum = metrics.roc_auc_score(np.concatenate(classifications), np.concatenate(event_probabilities))
-
 paired_classifications_cum, predictions_bin_cum = classify_continuous_predictions(np.vstack(predictions_aggregate), np.concatenate(classifications), np.vstack(labels), optimal_probability_threshold_cum, width, distance)
 
 
@@ -172,30 +140,29 @@ ax_roc.plot(ROC_curve_cum[0], ROC_curve_cum[1], color='k')
 ax_roc.plot(np.linspace(-1, 2, 100), np.linspace(-1, 2, 100), color='k', linestyle='--')
 ax_roc.set_ylim([-0.05, 1.05])
 ax_roc.set_xlim([-0.05, 1.05])
+ax_roc.scatter(operating_point_cum[0], operating_point_cum[1], color='r', s = 65)
 ax_roc.set_xlabel('False Positive Rate', fontsize = 14)
 ax_roc.set_ylabel('True Positive Rate', fontsize = 14)
-
-LOO_subjects = [subject[-3:] for subject in LOO_subjects]
-LOO_subjects.append('Combined')
-ax_roc.legend(['S1','S2','S3','S4','S5','S6','Combined'])
-# ax_roc.legend(LOO_subjects)
+ax_roc.legend(LOO_subjects)
 ax_roc.spines[['right', 'top']].set_visible(False)
-ax_roc.set_title(f'No Tuning')
+ax_roc.set_title(f'No Tuning, auc: {AUC_ROC_curve_cum:.4f}')
 
 columns = ['Sensitivity', 'Specificity', 'PPV', 'NPV', 'Accuracy']
 rows = ['$p_{0.5}$', '$p_{validation}$', '$p_{opt}$']
 formatted_prediction_statistics = [[f'{value:.4f}' for value in row] for row in prediction_statistics]
 
-#
-# import csv
-# csv_filename = "prediction_statistics_basic.csv"
-# with open(csv_filename, 'w', newline='') as csvfile:
-#     writer = csv.writer(csvfile)
-#     writer.writerows(formatted_prediction_statistics)
+table_data = [columns]  # Header row
+table_data.extend([[row_label] + row for row_label, row in zip(rows, formatted_prediction_statistics)])
+
+import csv
+csv_filename = "prediction_statistics_basic.csv"
+with open(csv_filename, 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerows(table_data)
 
 
 plt.tight_layout()
-fig.savefig('basic.svg')
+fig.savefig('no_tuning.svg')
 fig.show()
 
 

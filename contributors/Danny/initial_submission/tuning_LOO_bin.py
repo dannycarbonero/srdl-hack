@@ -4,14 +4,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
-import h5py
 import pickle
 import pandas as pd
 from scipy import signal
-import matplotlib.pyplot as plt
 
-from directory_handling import get_parent_path
-from utilities import binarize_classifications, make_refined_labels, create_training_subset, generate_LOO_subjects, load_RippleNet, freeze_RippleNet
+from contributors.Danny.initial_submission.directory_handling import get_parent_path
+from contributors.Danny.initial_submission.utilities import binarize_classifications, make_refined_labels, create_training_subset, generate_LOO_subjects, load_RippleNet, freeze_RippleNet, binarize_RippleNet
 
 #%% load Our Data
 silver_Fs = 2035 # from simulation
@@ -33,23 +31,25 @@ post_center_s = 0.05
 
 #%% training params
 batch_size = 32
-epochs = 256
+epochs = 128
 
-network_save_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_' + str(epochs) + '_epochs_binary', make = True)
-network_load_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(128) + '_epochs_binary', make = True)
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_' + str(epochs) + '_epochs_binary_final', make = True)
 
 #%% train
 for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
 
-    model = keras.models.load_model(network_load_directory + 'RippleNet_tuned_priors.h5')
-    model = freeze_RippleNet(model, [np.arange(0, len(model.layers))[-1]])
+    model = load_RippleNet('scc')
+    model = binarize_RippleNet(model)
+    model = freeze_RippleNet(model, [11,15,16])
+    model.summary()
 
 
-    print('Training on subject %i of %i' %(i, len(LOO_subjects)))
+    print('Training on subject %i of %i' %(i+1, len(LOO_subjects)))
 
-    model_checkpoint = tf.keras.callbacks.ModelCheckpoint(network_save_directory + 'RippleNet_tuned_optimal_' + subject + '.h5', monitor='loss', verbose=1, save_best_only=True, mode='min')
-    checkpoint_history = keras.callbacks.CSVLogger(network_save_directory + 'RippleNet_tuning_history_' + subject + '.csv')
+    model_checkpoint = tf.keras.callbacks.ModelCheckpoint(network_directory + 'RippleNet_tuned_optimal_' + subject + '.h5', monitor='loss', verbose=1, save_best_only=True, mode='min')
+    checkpoint_history = keras.callbacks.CSVLogger(network_directory + 'RippleNet_tuning_history_' + subject + '.csv')
     checkpoint_list = [model_checkpoint, checkpoint_history]
+
 
 
     # pull validation data
@@ -60,7 +60,7 @@ for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
 
     training_frame = create_training_subset(training_frame, int(training_frame['classification'].value_counts()['y'] * 2))
 
-    with open(network_save_directory + subject +'_val_frame.pkl', 'wb') as file:
+    with open(network_directory + subject +'_val_frame.pkl', 'wb') as file:
         pickle.dump(validation_frame, file)
 
 
@@ -100,17 +100,22 @@ for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
     training_labels = np.expand_dims(make_refined_labels(training_classifications, training_time_downsampled, center_s = label_center_s, pre_center_s = pre_center_s, post_center_s = post_center_s), 2)
     validation_labels = np.expand_dims(make_refined_labels(validation_classifications, validation_time_downsampled, center_s = label_center_s, pre_center_s = pre_center_s, post_center_s = post_center_s), 2)
 
+    training_labels = np.array(training_classifications_bin).reshape(-1,1)
+    validation_labels = np.array(validation_classifications_bin).reshape(-1, 1)
+
+
     # create data sets
     training_set = tf.data.Dataset.from_tensor_slices((training_series_downsampled, training_labels))
     training_set = training_set.shuffle(training_series_downsampled.shape[0])
     training_set = training_set.batch(batch_size)
 
     validation_set = tf.data.Dataset.from_tensor_slices((validation_series_downsampled, validation_labels))
-    validation_set = validation_set.shuffle(validation_series_downsampled.shape[0])
+    validation_set = validation_set.shuffle(validation_series_downsampled.shape[0]).batch(batch_size)
 
 
     history = model.fit(training_set, epochs = epochs, callbacks = checkpoint_list, validation_data=validation_set)
-    with open(network_save_directory + 'RippleNet_tuning_history_' + subject +'.pkl', 'wb') as file:
+    with open(network_directory + 'RippleNet_tuning_history_' + subject +'.pkl', 'wb') as file:
         pickle.dump(history.history, file)
 
-    model.save(network_save_directory + 'RippleNet_tuned_' + subject + '.h5')
+    model.save(network_directory + 'RippleNet_tuned_' + subject + '.h5')
+

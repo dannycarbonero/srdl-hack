@@ -1,8 +1,6 @@
 import numpy as np
 import pandas as pd
 import pickle as pkl
-from directory_handling import get_parent_path
-from utilities import generate_LOO_subjects
 
 #%%
 # load_path = get_parent_path('data', subdirectory ='Spike Ripples/silver/naive_csvs/')

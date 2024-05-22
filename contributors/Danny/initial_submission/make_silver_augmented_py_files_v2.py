@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 import pickle as pkl
-from directory_handling import get_parent_path
-from utilities import generate_LOO_subjects
+from contributors.Danny.initial_submission.directory_handling import get_parent_path
+from contributors.Danny.initial_submission.utilities import generate_LOO_subjects
 
 #%%
 subjects = generate_LOO_subjects()

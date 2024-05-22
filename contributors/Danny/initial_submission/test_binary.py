@@ -3,12 +3,9 @@ import numpy as np
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-import tensorflow as tf
 from tensorflow import keras
-import h5py
 import pickle
 import pandas as pd
-from scipy import signal
 from sklearn import metrics
 
 
@@ -18,8 +15,7 @@ plt.rcParams.update({'font.size': 14})  # Set the default font size to 12
 
 
 from directory_handling import get_parent_path
-from utilities import generate_LOO_subjects, pull_event_probabilities, build_data_sets, find_optimum_ROC_threshold, load_RippleNet, binarize_RippleNet, calculate_prediction_statistics, binarize_predictions
-from pathlib import Path
+from utilities import generate_LOO_subjects, build_data_sets, find_optimum_ROC_threshold, load_RippleNet, binarize_RippleNet, calculate_prediction_statistics, binarize_predictions
 
 #%% load Our Data
 silver_Fs = 2035 # from simulation q
@@ -29,16 +25,16 @@ with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
 # network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final')
-network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_final')
-# network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_binary_final')
+# network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_final')
+network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_binary_final')
 
 Basic = False
-LOO = False
-Priors = True
+LOO = True
+Priors = False
 
 prefix = 'priors'
 # plot_title = ('$\\mathit{In}$ $\\mathit{vivo}$ data alone')
-plot_title = 'Synthetic Data Alone'
+plot_title = 'Transfer Testing'
 # plot_title = ('Synthetic + $\\mathit{in}$ $\\mathit{vivo}$ data')
 
 #%%
@@ -46,7 +42,7 @@ LOO_subjects = generate_LOO_subjects()
 
 
 #%%
-# some constants
+# some constantsg
 cut_factor = 0.75
 cut_points = int(silver_Fs * cut_factor)
 RippleNet_Fs = 1250
