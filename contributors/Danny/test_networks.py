@@ -134,7 +134,7 @@ def test_network(data, LOO_subjects, network_load_directory = None, Basic = Fals
             ax.set_title(r'Synthetic + \textit{in vivo} data alone')
 
 
-    return statistics_50, statistics_th, fig
+    return statistics_50, statistics_th, ROC_statistics, fig
 
 
 
@@ -154,6 +154,6 @@ network_directories  = [get_parent_path('data', subdirectory = 'Spike Ripples/si
 fig = plt.figure()
 variables = []
 variables.append(test_network(data, LOO_subjects, Basic = True, fig = fig, subplot_dimensions = (2,2), i = 0))
-variables.append(test_network(data, LOO_subjects, LOO = True, fig = variables[0][2], subplot_dimensions = (2,2), i = 1, network_load_directory = network_directories[0]))
-variables.append(test_network(data, LOO_subjects, Priors = True, fig = variables[1][2], subplot_dimensions = (2,2), i = 2, network_load_directory = network_directories[1]))
-variables.append(test_network(data, LOO_subjects, LOO = True, fig = variables[2][2], subplot_dimensions = (2,2), i = 3, network_load_directory = network_directories[2]))
+variables.append(test_network(data, LOO_subjects, LOO = True, fig = variables[0][3], subplot_dimensions = (2,2), i = 1, network_load_directory = network_directories[0]))
+variables.append(test_network(data, LOO_subjects, Priors = True, fig = variables[1][3], subplot_dimensions = (2,2), i = 2, network_load_directory = network_directories[1]))
+variables.append(test_network(data, LOO_subjects, LOO = True, fig = variables[2][3], subplot_dimensions = (2,2), i = 3, network_load_directory = network_directories[2]))
