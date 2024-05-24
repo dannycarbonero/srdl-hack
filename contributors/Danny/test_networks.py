@@ -109,8 +109,7 @@ def test_network(data, LOO_subjects, network_load_directory = None, Basic = Fals
     AUC_ROC_curve_cum = metrics.roc_auc_score(np.concatenate(classifications), np.concatenate(event_probabilities))
 
     if fig:
-        ax = fig.add_subplot(subplot_dimensions[0], subplot_dimensions[1], i+1)
-        ax_roc = plt.subplot2grid((4, 1), (0, 0), rowspan=4, fig=fig)  # Allocate 3/4 of the figure to ROC
+        ax_roc = fig.add_subplot(subplot_dimensions[0], subplot_dimensions[1], i+1)
         for j in range(len(ROC_statistics)):
             ax_roc.plot(ROC_statistics[j][0], ROC_statistics[j][1], alpha=0.66)
         ax_roc.plot(ROC_curve_cum[0], ROC_curve_cum[1], color='k')
@@ -122,19 +121,18 @@ def test_network(data, LOO_subjects, network_load_directory = None, Basic = Fals
         ax_roc.set_ylabel('True Positive Rate', fontsize=14)
         ax_roc.spines[['right', 'top']].set_visible(False)
         if i+1 == 0:
-            ax.legend({})
+            ax_roc.legend({})
             ax_roc.legend(['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'Combined'])
-        if i+1 == 0:
-            ax.set_title('No tuning')
-        elif i+1 == 1:
-            ax.set_title(r'\textit{In vivo} data alone')
-        elif i+1 == 2:
-            ax.set_title('Synthetic Data Alone')
-        elif i+1 == 3:
-            ax.set_title(r'Synthetic + \textit{in vivo} data alone')
+        if i == 0:
+            ax_roc.set_title('No tuning')
+        elif i == 1:
+            ax_roc.set_title(r'$\it{In\ vivo}$ data')
+        elif i == 2:
+            ax_roc.set_title('Synthetic Data Alone')
+        elif i == 3:
+            ax_roc.set_title(r'Synthetic + $\it{in\ vivo}$ data')
 
-
-    return statistics_50, statistics_th, fig
+    return statistics_50, statistics_th, ROC_statistics, ROC_aucs, fig
 
 
 
@@ -151,9 +149,11 @@ network_directories  = [get_parent_path('data', subdirectory = 'Spike Ripples/si
                         get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_final'),
                         get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_binary_final')]
 
-fig = plt.figure()
+fig = plt.figure(figsize = (12,8))
 variables = []
 variables.append(test_network(data, LOO_subjects, Basic = True, fig = fig, subplot_dimensions = (2,2), i = 0))
-variables.append(test_network(data, LOO_subjects, LOO = True, fig = variables[0][2], subplot_dimensions = (2,2), i = 1, network_load_directory = network_directories[0]))
-variables.append(test_network(data, LOO_subjects, Priors = True, fig = variables[1][2], subplot_dimensions = (2,2), i = 2, network_load_directory = network_directories[1]))
-variables.append(test_network(data, LOO_subjects, LOO = True, fig = variables[2][2], subplot_dimensions = (2,2), i = 3, network_load_directory = network_directories[2]))
+variables.append(test_network(data, LOO_subjects, LOO = True, fig = variables[0][4], subplot_dimensions = (2,2), i = 1, network_load_directory = network_directories[0]))
+variables.append(test_network(data, LOO_subjects, Priors = True, fig = variables[1][4], subplot_dimensions = (2,2), i = 2, network_load_directory = network_directories[1]))
+variables.append(test_network(data, LOO_subjects, LOO = True, fig = variables[2][4], subplot_dimensions = (2,2), i = 3, network_load_directory = network_directories[2]))
+variables[-1][4].tight_layout()
+variables[-1][4].show()
