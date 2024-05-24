@@ -55,7 +55,7 @@ training_frame_bk = data[data['classification'] == 'bk'][shared_keys]
 validation_frame_bk = training_frame_bk.sample(n = int(training_frame_bk.shape[0] * 0.1))[shared_keys]
 training_frame_bk = training_frame_bk.loc[training_frame_bk.index.difference(validation_frame_bk.index)]
 training_frame_n = data_priors[data_priors['classification'] == 'n'].sample(n = int(training_frame_y.shape[0] - training_frame_bk.shape[0]))[shared_keys]
-training_frame = pd.concat((training_frame_y, training_frame_y, training_frame_bk))
+training_frame = pd.concat((training_frame_y, training_frame_n, training_frame_bk))
 validation_frame_n = val_priors[val_priors['classification'] == 'n'].sample(n = int(val_priors.shape[0]/2 - validation_frame_bk.shape[0]))[shared_keys]
 validation_frame_y = val_priors[val_priors['classification']== 'y'][shared_keys]
 validation_frame = pd.concat((validation_frame_y, validation_frame_n, validation_frame_bk))
@@ -77,7 +77,7 @@ validation_frame = pd.concat((validation_frame_y, validation_frame_n, validation
 # validation_frame_n = priors_frame_n.loc[priors_frame_n.index.difference(training_frame_n.index)].sample(int(vivo_y_frame.shape[0]*.05))[shared_keys]
 # validation_frame_bk = vivo_bk_frame.loc[vivo_bk_frame.index.difference(training_frame_bk.index)].sample(int(vivo_y_frame.shape[0]*.05))[shared_keys]
 #
-# training_frame = pd.concat((training_frame_y, training_frame_y, training_frame_bk))
+# training_frame = pd.concat((training_frame_y, training_frame_n, training_frame_bk))
 # validation_frame = pd.concat((validation_frame_y, validation_frame_n, validation_frame_bk))
 
 with open(network_directory + 'val_frame.pkl', 'wb') as file:

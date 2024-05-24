@@ -45,7 +45,7 @@ for num_ripples in num_synthetic_ripples:
 
     network_directory = get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_' + str(epochs) + '_epochs_' + str(num_ripples) + '_SEs_binary', make = True)
 
-    model = load_RippleNet('scc')
+    model = load_RippleNet('')
     model = binarize_RippleNet(model)
     # model = reset_RippleNet(model)
     model = freeze_RippleNet(model, [11, 15, 16])
@@ -62,7 +62,7 @@ for num_ripples in num_synthetic_ripples:
     validation_frame_bk = training_frame_bk.sample(n=int(training_frame_bk.shape[0] * 0.1))[shared_keys]
     training_frame_bk = training_frame_bk.loc[training_frame_bk.index.difference(validation_frame_bk.index)]
     training_frame_n = data_priors[data_priors['classification'] == 'n'].sample( n=int(training_frame_y.shape[0] - training_frame_bk.shape[0]))[shared_keys]
-    training_frame = pd.concat((training_frame_y, training_frame_y, training_frame_bk))
+    training_frame = pd.concat((training_frame_y, training_frame_n, training_frame_bk))
     validation_frame_n = val_priors[val_priors['classification'] == 'n'].sample(n=int(val_priors.shape[0] / 2 - validation_frame_bk.shape[0]))[shared_keys]
     validation_frame_y = val_priors[val_priors['classification'] == 'y'][shared_keys]
     validation_frame = pd.concat((validation_frame_y, validation_frame_n, validation_frame_bk))

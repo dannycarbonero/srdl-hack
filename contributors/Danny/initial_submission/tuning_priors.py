@@ -64,7 +64,7 @@ validation_frame_y = priors_frame_y.loc[priors_frame_y.index.difference(training
 validation_frame_n = priors_frame_n.loc[priors_frame_n.index.difference(training_frame_n.index)].sample(int(vivo_y_frame.shape[0]*.05))[shared_keys]
 validation_frame_bk = vivo_bk_frame.loc[vivo_bk_frame.index.difference(training_frame_bk.index)].sample(int(vivo_y_frame.shape[0]*.05))[shared_keys]
 
-training_frame = pd.concat((training_frame_y, training_frame_y, training_frame_bk))
+training_frame = pd.concat((training_frame_y, training_frame_n, training_frame_bk))
 validation_frame = pd.concat((validation_frame_y, validation_frame_n, validation_frame_bk))
 
 with open(network_directory + 'val_frame.pkl', 'wb') as file:
