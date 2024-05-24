@@ -67,6 +67,8 @@ for num_ripples in num_synthetic_ripples:
     validation_frame_y = val_priors[val_priors['classification'] == 'y'][shared_keys]
     validation_frame = pd.concat((validation_frame_y, validation_frame_n, validation_frame_bk))
 
+    print(training_frame['classification'].value_counts())
+
     with open(network_directory + 'val_frame.pkl', 'wb') as file:
         pickle.dump(validation_frame, file)
 
