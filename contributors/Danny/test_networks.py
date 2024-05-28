@@ -176,11 +176,11 @@ for i in range(len(network_directories)):
 
     variables = test_network(data, LOO_subjects, Basic = Basics[i], LOO = LOO[i], Priors = Priors[i], network_load_directory = network_directories[i])
 
-    mean_50 = np.mean(variables[0], axis = 1)
-    stdev_50 = np.std(variables[0], axis = 1)
+    mean_50 = np.mean(variables[0], axis = 0)
+    stdev_50 = np.std(variables[0], axis = 0)
 
-    mean_th = np.mean(variables[1], axis = 1)
-    stdev_th = np.std(variables[1], axis = 1)
+    mean_th = np.mean(variables[1], axis = 0)
+    stdev_th = np.std(variables[1], axis = 0)
 
     stats_50.append([f"{mean:.2f} ({stdev:.2f})" for mean, stdev in zip(mean_50, stdev_50)])
 
@@ -199,6 +199,8 @@ write_to_csv('stats_50.csv', network_titles, stats_50)
 write_to_csv('stats_th.csv', network_titles, stats_th)
 
 
+with open('ROC_stats.csv', mode='w', newline='') as file:
+    csv.writer(file).writerows([[element] for element in stats_ROC_aucs])
 
 # network_directories  = [get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final'),
 #                         get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_final'),
