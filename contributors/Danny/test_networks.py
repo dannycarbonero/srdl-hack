@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = 'Arial'
 plt.rcParams.update({'font.size': 14})  # Set the default font size to 12
 
+import csv
 from directory_handling import get_parent_path
 from utilities import build_data_sets, find_optimum_ROC_threshold, load_RippleNet, binarize_RippleNet, calculate_prediction_statistics, binarize_predictions, generate_LOO_subjects
 
@@ -158,14 +159,14 @@ Network_Directories = []
 network_directories = [None,
     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final'),
     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_4000_SEs_binary'),
-    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_6000_SEs_binary')],
-#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_8000_SEs_binary'),
-#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_10000_SEs_binary'),
-#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_4000_SEs_binary'),
-#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_6000_SEs_binary'),
-#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_8000_SEs_binary'),
-#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_10000_SEs_binary')
-# ]
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_6000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_8000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_10000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_4000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_6000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_8000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_10000_SEs_binary')
+]
 
 stats_50 = []
 stats_th = []
@@ -181,13 +182,23 @@ for i in range(len(network_directories)):
     mean_th = np.mean(variables[1], axis = 1)
     stdev_th = np.std(variables[1], axis = 1)
 
-    for mean, stdev in zip(mean_50, stdev_50):
-        stats_50.append(f"{mean:.2f} ({stdev:.2f})")
+    stats_50.append([f"{mean:.2f} ({stdev:.2f})" for mean, stdev in zip(mean_50, stdev_50)])
 
-    for mean, stdev in zip(mean_th, stdev_th):
-        stats_th.append(f"{mean:.2f} ({stdev:.2f})")
+    stats_th.append([f"{mean:.2f} ({stdev:.2f})" for mean, stdev in zip(mean_th, stdev_th)])
 
     stats_ROC_aucs.append(f"{np.mean(variables[3]):.2f} ({np.std(variables[3]):.2f})")
+
+def write_to_csv(filename, titles, running_means):
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        for title, results in zip(titles, running_means):
+            writer.writerow([title] + results)
+
+# Write the running means to CSV files
+write_to_csv('stats_50.csv', network_titles, stats_50)
+write_to_csv('stats_th.csv', network_titles, stats_th)
+
+
 
 # network_directories  = [get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final'),
 #                         get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_final'),
