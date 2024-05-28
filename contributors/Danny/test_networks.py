@@ -158,24 +158,22 @@ Network_Directories = []
 network_directories = [None,
     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final'),
     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_4000_SEs_binary'),
-    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_6000_SEs_binary'),
-    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_8000_SEs_binary'),
-    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_10000_SEs_binary'),
-    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_4000_SEs_binary'),
-    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_6000_SEs_binary'),
-    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_8000_SEs_binary'),
-    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_10000_SEs_binary')
-]
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_6000_SEs_binary')],
+#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_8000_SEs_binary'),
+#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_10000_SEs_binary'),
+#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_4000_SEs_binary'),
+#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_6000_SEs_binary'),
+#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_8000_SEs_binary'),
+#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_10000_SEs_binary')
+# ]
 
 stats_50 = []
 stats_th = []
-stdevs_th = []
 stats_ROC_aucs = []
-
 
 for i in range(len(network_directories)):
 
-    variables = test_network(data, LOO_subjects, Basic = Basics[i], LOO = LOO[i], Priors = Priors[i], network_load_directory = network_directories)
+    variables = test_network(data, LOO_subjects, Basic = Basics[i], LOO = LOO[i], Priors = Priors[i], network_load_directory = network_directories[i])
 
     mean_50 = np.mean(variables[0], axis = 1)
     stdev_50 = np.std(variables[0], axis = 1)
