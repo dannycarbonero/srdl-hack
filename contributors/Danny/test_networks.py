@@ -57,7 +57,7 @@ def test_network(data, LOO_subjects, network_load_directory = None, Basic = Fals
             validation_frame = data.copy()[data['subject'] != subject]
 
         if LOO:
-            model = keras.models.load_model(network_load_directory + 'RippleNet_tuned_optimal_' + subject + '.h5')
+            model = keras.models.load_model(network_load_directory + 'RippleNet_tuned_' + subject + '.h5')
 
             with open(network_load_directory + subject + '_val_frame.pkl', 'rb') as file:
                 validation_frame = pickle.load(file)
@@ -145,15 +145,58 @@ with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
 
 LOO_subjects = generate_LOO_subjects()
 
-network_directories  = [get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final'),
-                        get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_final'),
-                        get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_binary_final')]
 
 fig = plt.figure(figsize = (12,8))
 variables = []
-variables.append(test_network(data, LOO_subjects, Basic = True, fig = fig, subplot_dimensions = (2,2), i = 0))
-variables.append(test_network(data, LOO_subjects, LOO = True, fig = variables[0][4], subplot_dimensions = (2,2), i = 1, network_load_directory = network_directories[0]))
-variables.append(test_network(data, LOO_subjects, Priors = True, fig = variables[1][4], subplot_dimensions = (2,2), i = 2, network_load_directory = network_directories[1]))
-variables.append(test_network(data, LOO_subjects, LOO = True, fig = variables[2][4], subplot_dimensions = (2,2), i = 3, network_load_directory = network_directories[2]))
-variables[-1][4].tight_layout()
-variables[-1][4].show()
+network_titles = ['No Tuning', 'LOO Training', '4000 SE Priors', '6000 SE Priors', '8000 SE Priors', '10000 SE Priors', '4000 SE Transfer', '6000 SE Transfer', '8000 SE Transfer', '10000 SE Transfer']
+Basics = [True]
+Basics.extend([False] * (len(network_titles) -1))
+LOO = [False, True, False, False, False, False, True, True, True, True]
+Priors = [False, False, True, True, True, True, False, False, False, False]
+Network_Directories = []
+
+network_directories = [None,
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_4000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_6000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_8000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_10000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_4000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_6000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_8000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_10000_SEs_binary')
+]
+
+stats_50 = []
+stats_th = []
+stdevs_th = []
+stats_ROC_aucs = []
+
+
+for i in range(len(network_directories)):
+
+    variables = test_network(data, LOO_subjects, Basic = Basics[i], LOO = LOO[i], Priors = Priors[i], network_load_directory = network_directories)
+
+    mean_50 = np.mean(variables[0], axis = 1)
+    stdev_50 = np.std(variables[0], axis = 1)
+
+    mean_th = np.mean(variables[1], axis = 1)
+    stdev_th = np.std(variables[1], axis = 1)
+
+    for mean, stdev in zip(mean_50, stdev_50):
+        stats_50.append(f"{mean:.2f} ({stdev:.2f})")
+
+    for mean, stdev in zip(mean_th, stdev_th):
+        stats_th.append(f"{mean:.2f} ({stdev:.2f})")
+
+    stats_ROC_aucs.append(f"{np.mean(variables[3]):.2f} ({np.std(variables[3]):.2f})")
+
+# network_directories  = [get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final'),
+#                         get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_final'),
+#                         get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_binary_final')]
+# variables.append(test_network(data, LOO_subjects, Basic = True, fig = fig, subplot_dimensions = (2,2), i = 0))
+# variables.append(test_network(data, LOO_subjects, LOO = True, fig = variables[0][4], subplot_dimensions = (2,2), i = 1, network_load_directory = network_directories[0]))
+# variables.append(test_network(data, LOO_subjects, Priors = True, fig = variables[1][4], subplot_dimensions = (2,2), i = 2, network_load_directory = network_directories[1]))
+# variables.append(test_network(data, LOO_subjects, LOO = True, fig = variables[2][4], subplot_dimensions = (2,2), i = 3, network_load_directory = network_directories[2]))
+# variables[-1][4].tight_layout()
+# variables[-1][4].show()
