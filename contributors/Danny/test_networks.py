@@ -147,7 +147,6 @@ with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
 LOO_subjects = generate_LOO_subjects()
 
 
-fig = plt.figure(figsize = (12,8))
 variables = []
 network_titles = ['No Tuning', 'LOO Training', '4000 SE Priors', '6000 SE Priors', '8000 SE Priors', '10000 SE Priors', '4000 SE Transfer', '6000 SE Transfer', '8000 SE Transfer', '10000 SE Transfer']
 Basics = [True]
@@ -168,40 +167,53 @@ network_directories = [None,
     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_10000_SEs_binary')
 ]
 
-stats_50 = []
-stats_th = []
-stats_ROC_aucs = []
+# stats_50 = []
+# stats_th = []
+# stats_ROC_aucs = []
+#
+# for i in range(len(network_directories)):
+#
+#     variables = test_network(data, LOO_subjects, Basic = Basics[i], LOO = LOO[i], Priors = Priors[i], network_load_directory = network_directories[i])
+#
+#     mean_50 = np.mean(variables[0], axis = 0)
+#     stdev_50 = np.std(variables[0], axis = 0)
+#
+#     mean_th = np.mean(variables[1], axis = 0)
+#     stdev_th = np.std(variables[1], axis = 0)
+#
+#     stats_50.append([f"{mean:.2f} ({stdev:.2f})" for mean, stdev in zip(mean_50, stdev_50)])
+#
+#     stats_th.append([f"{mean:.2f} ({stdev:.2f})" for mean, stdev in zip(mean_th, stdev_th)])
+#
+#     stats_ROC_aucs.append(f"{np.mean(variables[3]):.2f} ({np.std(variables[3]):.2f})")
+#
+# def write_to_csv(filename, titles, running_means):
+#     with open(filename, mode='w', newline='') as file:
+#         writer = csv.writer(file)
+#         for title, results in zip(titles, running_means):
+#             writer.writerow([title] + results)
+#
+# # Write the running means to CSV files
+# write_to_csv('stats_50.csv', network_titles, stats_50)
+# write_to_csv('stats_th.csv', network_titles, stats_th)
+#
+#
+# with open('ROC_stats.csv', mode='w', newline='') as file:
+#     csv.writer(file).writerows([[element] for element in stats_ROC_aucs])
 
-for i in range(len(network_directories)):
 
-    variables = test_network(data, LOO_subjects, Basic = Basics[i], LOO = LOO[i], Priors = Priors[i], network_load_directory = network_directories[i])
+#%%
+fig = plt.figure(figsize = (12,8))
+variables = []
+indices_of_interest = [0,1,5,9]
+for index, i in zip(indices_of_interest, range(len(indices_of_interest))):
+    variables.append(test_network(data, LOO_subjects, Basic = Basics[index], LOO = LOO[index], Priors = Priors[index], network_load_directory = network_directories[index], fig = fig, subplot_dimensions = (2,2), i = i))
 
-    mean_50 = np.mean(variables[0], axis = 0)
-    stdev_50 = np.std(variables[0], axis = 0)
-
-    mean_th = np.mean(variables[1], axis = 0)
-    stdev_th = np.std(variables[1], axis = 0)
-
-    stats_50.append([f"{mean:.2f} ({stdev:.2f})" for mean, stdev in zip(mean_50, stdev_50)])
-
-    stats_th.append([f"{mean:.2f} ({stdev:.2f})" for mean, stdev in zip(mean_th, stdev_th)])
-
-    stats_ROC_aucs.append(f"{np.mean(variables[3]):.2f} ({np.std(variables[3]):.2f})")
-
-def write_to_csv(filename, titles, running_means):
-    with open(filename, mode='w', newline='') as file:
-        writer = csv.writer(file)
-        for title, results in zip(titles, running_means):
-            writer.writerow([title] + results)
-
-# Write the running means to CSV files
-write_to_csv('stats_50.csv', network_titles, stats_50)
-write_to_csv('stats_th.csv', network_titles, stats_th)
+variables[-1][4].tight_layout()
+variables[-1][4].show()
 
 
-with open('ROC_stats.csv', mode='w', newline='') as file:
-    csv.writer(file).writerows([[element] for element in stats_ROC_aucs])
-
+#%% testing with old data
 # network_directories  = [get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final'),
 #                         get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_binary_final'),
 #                         get_parent_path('data', subdirectory = 'Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_binary_final')]
