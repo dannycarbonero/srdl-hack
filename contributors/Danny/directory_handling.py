@@ -10,7 +10,7 @@ def get_parent_path(context, subdirectory = None, make = False):
         if 'Main' in computer:
 
             if os == 'Windows':
-                parent_path = 'F:/Neural Data/'
+                parent_path = 'E:/Neural Data/'
             else:
                 parent_path = '/home/warehaus/Neural Data/'
 
