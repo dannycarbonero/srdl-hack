@@ -65,8 +65,19 @@ value_counts = []
 for subject in LOO_subjects:
     value_counts.append(data[data['subject'] == subject]['classification'].value_counts())
 
+# number of ripples
 ripple_counts = []
 for i in range(1,len(LOO_subjects)):
     ripple_counts.append(value_counts[i]['spike ripple'])
 print(f"The minimum value is {np.min(ripple_counts)}, the maximum value is {np.max(ripple_counts)}, and the mean is {np.mean(ripple_counts):.2f}.")
 
+# ripples per LOO set
+ripple_counts_all = []
+for i in range(len(LOO_subjects)):
+    ripple_counts_all.append(value_counts[i]['spike ripple'])
+LOO_sets = [sum(ripple_counts_all) - ripple_counts_all[i] for i in range(1,len(ripple_counts_all))]
+print(f"The minimum value is {np.min(LOO_sets)}, the maximum value is {np.max(LOO_sets)}, and the mean is {np.mean(LOO_sets):.2f}.")
+
+print(f"The total number of background events were {len(data[data['classification'] == 'background']):.2f}.")
+
+print(value_counts[0])
