@@ -28,6 +28,12 @@ def test_network(data, LOO_subjects, network_load_directory = None, Basic = Fals
     post_center_s = 0.05
     window_bounds = [label_center_s - pre_center_s, label_center_s + post_center_s]
 
+    # prediction params
+    width_s = .025
+    distance_s = .1
+    width = int(RippleNet_Fs * width_s)
+    distance = int(RippleNet_Fs * distance_s)
+
     #%% initialize variables
     predictions_bin = []
     paired_classifications = []
@@ -57,11 +63,38 @@ def test_network(data, LOO_subjects, network_load_directory = None, Basic = Fals
         if Basic:
             validation_frame = data.copy()[data['subject'] != subject]
 
+            # testing_frame = data.copy()[data['subject'] == subject]
+            # _, testing_data = build_data_sets(testing_frame, cut_factor=cut_factor, silver_Fs=silver_Fs,
+            #                                   RippleNet_Fs=RippleNet_Fs, label_center_s=label_center_s,
+            #                                   pre_center_s=pre_center_s, post_center_s=post_center_s)
+            # predictions = model.predict(np.expand_dims(testing_data['series_downsampled'], axis=2)).squeeze()
+            # probabilities = pull_event_probabilities(predictions, testing_data['time_downsampled'], window_bounds)
+            # optimal_probability_threshold, _ = find_optimum_ROC_threshold(probabilities, testing_data['classifications'])
+            # optimal_thresholds.append(optimal_probability_threshold)
+            # event_probabilities.append(probabilities)
+            # predictions_aggregate.append(predictions)
+            #
+            # paired_classifications_working, predictions_bin_working = classify_continuous_predictions(predictions,
+            #                                                                                           testing_data[
+            #                                                                                               'classifications'],
+            #                                                                                           testing_data[
+            #                                                                                               'labels'],
+            #                                                                                           optimal_probability_threshold,
+            #                                                                                           width, distance)
+            # statistics_th.append(calculate_prediction_statistics(paired_classifications_working, predictions_bin_working))
+            # ROC_statistics.append(metrics.roc_curve(testing_data['classifications'], probabilities))
+            # ROC_aucs.append(metrics.roc_auc_score(testing_data['classifications'], probabilities))
+            #
+            # paired_classifications_50, predictions_bin_50 = classify_continuous_predictions(predictions, testing_data[
+            #     'classifications'], testing_data['labels'], 0.5, width, distance)
+            # statistics_50.append(calculate_prediction_statistics(paired_classifications_50, predictions_bin_50))
+
         if LOO:
             model = keras.models.load_model(network_load_directory + 'RippleNet_tuned_' + subject + '.h5')
 
             with open(network_load_directory + subject + '_val_frame.pkl', 'rb') as file:
                 validation_frame = pickle.load(file)
+
 
         _, validation_data = build_data_sets(validation_frame, cut_factor=cut_factor, silver_Fs=silver_Fs,
                                              RippleNet_Fs=RippleNet_Fs, label_center_s=label_center_s,
@@ -223,3 +256,4 @@ variables[-1][4].show()
 # variables.append(test_network(data, LOO_subjects, LOO = True, fig = variables[2][4], subplot_dimensions = (2,2), i = 3, network_load_directory = network_directories[2]))
 # variables[-1][4].tight_layout()
 # variables[-1][4].show()
+
