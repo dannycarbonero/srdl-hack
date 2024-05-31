@@ -65,6 +65,8 @@ for num_ripples in num_synthetic_ripples:
         training_frame = create_training_subset(training_frame,
                                                 int(training_frame['classification'].value_counts()['y'] * 2))
 
+        print(training_frame['classification'].value_counts())
+
         with open(network_save_directory + subject + '_val_frame.pkl', 'wb') as file:
             pickle.dump(validation_frame, file)
 

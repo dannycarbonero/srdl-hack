@@ -21,5 +21,5 @@ cd /projectnb/ecog/dcarbo/srdl-hack/contributors/Danny/
 
 module load miniconda
 conda activate SRDL
-python train_priors.py
+python train_priors_v2.py
 python transfer_LOO.py

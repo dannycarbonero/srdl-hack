@@ -55,8 +55,9 @@ for i, subject in zip(range(len(LOO_subjects)), LOO_subjects):
     frame_y = LOO_frame[LOO_frame['classification'] == 'y']
     validation_frame = pd.concat((LOO_frame[LOO_frame['classification'] == 'y'].sample(int(frame_y.shape[0] * 0.1)), (LOO_frame[LOO_frame['classification'] == 'n'].sample(int(frame_y.shape[0] * 0.05))),(LOO_frame[LOO_frame['classification'] == 'bk'].sample(int(frame_y.shape[0] * 0.05)))))
     training_frame = LOO_frame.loc[LOO_frame.index.difference(validation_frame.index)]
-
     training_frame = create_training_subset(training_frame, int(training_frame['classification'].value_counts()['y'] * 2))
+
+    print(training_frame['classification'].value_counts())
 
     with open(network_directory + subject +'_val_frame.pkl', 'wb') as file:
         pickle.dump(validation_frame, file)
