@@ -13,7 +13,7 @@ plt.rcParams.update({'font.size': 14})  # Set the default font size to 12
 
 import csv
 from directory_handling import get_parent_path
-from utilities import build_data_sets, find_optimum_ROC_threshold, load_RippleNet, binarize_RippleNet, calculate_prediction_statistics, binarize_predictions, generate_LOO_subjects
+from utilities import build_data_sets, find_optimum_ROC_threshold, load_RippleNet, binarize_RippleNet, calculate_prediction_statistics, binarize_predictions, generate_LOO_subjects, pull_event_probabilities, classify_continuous_predictions
 
 #%% function to return statistics, and ROC axis
 def test_network(data, LOO_subjects, network_load_directory = None, Basic = False, LOO = False, Priors = False, fig = None, subplot_dimensions = None, i = None):
@@ -50,7 +50,7 @@ def test_network(data, LOO_subjects, network_load_directory = None, Basic = Fals
 
     if Basic:
         model = load_RippleNet('code')
-        model = binarize_RippleNet(model)
+        # model = binarize_RippleNet(model)
 
     if Priors:
         model = keras.models.load_model(network_load_directory + 'RippleNet_tuned_priors.h5')
@@ -61,33 +61,7 @@ def test_network(data, LOO_subjects, network_load_directory = None, Basic = Fals
     for subject in LOO_subjects:
 
         if Basic:
-            validation_frame = data.copy()[data['subject'] != subject]
-
-            # testing_frame = data.copy()[data['subject'] == subject]
-            # _, testing_data = build_data_sets(testing_frame, cut_factor=cut_factor, silver_Fs=silver_Fs,
-            #                                   RippleNet_Fs=RippleNet_Fs, label_center_s=label_center_s,
-            #                                   pre_center_s=pre_center_s, post_center_s=post_center_s)
-            # predictions = model.predict(np.expand_dims(testing_data['series_downsampled'], axis=2)).squeeze()
-            # probabilities = pull_event_probabilities(predictions, testing_data['time_downsampled'], window_bounds)
-            # optimal_probability_threshold, _ = find_optimum_ROC_threshold(probabilities, testing_data['classifications'])
-            # optimal_thresholds.append(optimal_probability_threshold)
-            # event_probabilities.append(probabilities)
-            # predictions_aggregate.append(predictions)
-            #
-            # paired_classifications_working, predictions_bin_working = classify_continuous_predictions(predictions,
-            #                                                                                           testing_data[
-            #                                                                                               'classifications'],
-            #                                                                                           testing_data[
-            #                                                                                               'labels'],
-            #                                                                                           optimal_probability_threshold,
-            #                                                                                           width, distance)
-            # statistics_th.append(calculate_prediction_statistics(paired_classifications_working, predictions_bin_working))
-            # ROC_statistics.append(metrics.roc_curve(testing_data['classifications'], probabilities))
-            # ROC_aucs.append(metrics.roc_auc_score(testing_data['classifications'], probabilities))
-            #
-            # paired_classifications_50, predictions_bin_50 = classify_continuous_predictions(predictions, testing_data[
-            #     'classifications'], testing_data['labels'], 0.5, width, distance)
-            # statistics_50.append(calculate_prediction_statistics(paired_classifications_50, predictions_bin_50))
+            validation_frame = data[~data['subject'].isin(LOO_subjects)]
 
         if LOO:
             model = keras.models.load_model(network_load_directory + 'RippleNet_tuned_' + subject + '.h5')
@@ -96,43 +70,81 @@ def test_network(data, LOO_subjects, network_load_directory = None, Basic = Fals
                 validation_frame = pickle.load(file)
 
 
-        _, validation_data = build_data_sets(validation_frame, cut_factor=cut_factor, silver_Fs=silver_Fs,
-                                             RippleNet_Fs=RippleNet_Fs, label_center_s=label_center_s,
-                                             pre_center_s=pre_center_s, post_center_s=post_center_s)
-        predictions = model.predict(np.expand_dims(validation_data['series_downsampled'], axis=2)).squeeze()
-        probabilities = predictions.copy()
-        optimal_probability_threshold, optimal_operating_point = find_optimum_ROC_threshold(probabilities, validation_data[
-            'classifications'])
-        optimal_thresholds.append(optimal_probability_threshold)
+        if Basic:
 
-        testing_frame = data.copy()[data['subject'] == subject]
-        _, testing_data = build_data_sets(testing_frame, cut_factor=cut_factor, silver_Fs=silver_Fs,
-                                          RippleNet_Fs=RippleNet_Fs, label_center_s=label_center_s,
-                                          pre_center_s=pre_center_s, post_center_s=post_center_s)
-        predictions = model.predict(np.expand_dims(testing_data['series_downsampled'], axis=2)).squeeze()
-        probabilities = predictions.copy()
-        event_probabilities.append(probabilities)
-        predictions_aggregate.append(predictions)
+            _, validation_data = build_data_sets(validation_frame, cut_factor=cut_factor, silver_Fs=silver_Fs,
+                                              RippleNet_Fs=RippleNet_Fs, label_center_s=label_center_s,
+                                              pre_center_s=pre_center_s, post_center_s=post_center_s)
+            predictions = model.predict(np.expand_dims(validation_data['series_downsampled'], axis=2)).squeeze()
+            probabilities = pull_event_probabilities(predictions, validation_data['time_downsampled'], window_bounds)
+            optimal_probability_threshold, _ = find_optimum_ROC_threshold(probabilities, validation_data['classifications'])
 
-        paired_classifications_working = testing_data['classifications']
-        predictions_bin_working = binarize_predictions(probabilities.copy(), optimal_probability_threshold)
 
-        statistics_th.append((calculate_prediction_statistics(paired_classifications_working, predictions_bin_working)))
 
-        predictions_bin_50_working = binarize_predictions(probabilities.copy(), 0.5)
-        statistics_50.append(calculate_prediction_statistics(paired_classifications_working, predictions_bin_50_working))
+            testing_frame = data.copy()[data['subject'] == subject]
+            _, testing_data = build_data_sets(testing_frame, cut_factor=cut_factor, silver_Fs=silver_Fs,
+                                              RippleNet_Fs=RippleNet_Fs, label_center_s=label_center_s,
+                                              pre_center_s=pre_center_s, post_center_s=post_center_s)
+            predictions = model.predict(np.expand_dims(testing_data['series_downsampled'], axis=2)).squeeze()
+            probabilities = pull_event_probabilities(predictions, testing_data['time_downsampled'], window_bounds)
+            event_probabilities.append(probabilities)
+            predictions_aggregate.append(predictions)
 
-        ROC_statistics.append(metrics.roc_curve(testing_data['classifications'], probabilities))
-        ROC_aucs.append(metrics.roc_auc_score(testing_data['classifications'], probabilities))
+            paired_classifications_working, predictions_bin_working = classify_continuous_predictions(predictions,
+                                                                                                      testing_data[
+                                                                                                          'classifications'],
+                                                                                                      testing_data[
+                                                                                                          'labels'],
+                                                                                                      optimal_probability_threshold,
+                                                                                                      width, distance)
+            statistics_th.append(calculate_prediction_statistics(paired_classifications_working, predictions_bin_working))
 
-        confusion_matrices.append(
-            metrics.confusion_matrix(paired_classifications_working, predictions_bin_working).ravel())  # tn, fp, fn, tp
 
-        classifications.append(testing_data['classifications'])
-        labels.append(testing_data['labels'])
+            paired_classifications_50, predictions_bin_50 = classify_continuous_predictions(predictions, testing_data['classifications'], testing_data['labels'], 0.5, width, distance)
+            statistics_50.append(calculate_prediction_statistics(paired_classifications_50, predictions_bin_50))
 
-        paired_classifications.append(paired_classifications_working)
-        predictions_bin.append(predictions_bin_working)
+            ROC_statistics.append(metrics.roc_curve(testing_data['classifications'], probabilities))
+            ROC_aucs.append(metrics.roc_auc_score(testing_data['classifications'], probabilities))
+            classifications.append(testing_data['classifications'])
+
+
+        else:
+            _, validation_data = build_data_sets(validation_frame, cut_factor=cut_factor, silver_Fs=silver_Fs,
+                                                 RippleNet_Fs=RippleNet_Fs, label_center_s=label_center_s,
+                                                 pre_center_s=pre_center_s, post_center_s=post_center_s)
+            predictions = model.predict(np.expand_dims(validation_data['series_downsampled'], axis=2)).squeeze()
+            probabilities = predictions.copy()
+            optimal_probability_threshold, optimal_operating_point = find_optimum_ROC_threshold(probabilities, validation_data[
+                'classifications'])
+            optimal_thresholds.append(optimal_probability_threshold)
+
+            testing_frame = data.copy()[data['subject'] == subject]
+            _, testing_data = build_data_sets(testing_frame, cut_factor=cut_factor, silver_Fs=silver_Fs,
+                                              RippleNet_Fs=RippleNet_Fs, label_center_s=label_center_s,
+                                              pre_center_s=pre_center_s, post_center_s=post_center_s)
+            predictions = model.predict(np.expand_dims(testing_data['series_downsampled'], axis=2)).squeeze()
+            probabilities = predictions.copy()
+            event_probabilities.append(probabilities)
+            predictions_aggregate.append(predictions)
+
+            paired_classifications_working = testing_data['classifications']
+            predictions_bin_working = binarize_predictions(probabilities.copy(), optimal_probability_threshold)
+
+            statistics_th.append((calculate_prediction_statistics(paired_classifications_working, predictions_bin_working)))
+
+            predictions_bin_50_working = binarize_predictions(probabilities.copy(), 0.5)
+            statistics_50.append(calculate_prediction_statistics(paired_classifications_working, predictions_bin_50_working))
+
+            ROC_statistics.append(metrics.roc_curve(testing_data['classifications'], probabilities))
+            ROC_aucs.append(metrics.roc_auc_score(testing_data['classifications'], probabilities))
+
+            confusion_matrices.append(metrics.confusion_matrix(paired_classifications_working, predictions_bin_working).ravel())  # tn, fp, fn, tp
+
+            classifications.append(testing_data['classifications'])
+            labels.append(testing_data['labels'])
+
+            paired_classifications.append(paired_classifications_working)
+            predictions_bin.append(predictions_bin_working)
 
 
     statistics_50 = np.vstack(statistics_50)
@@ -183,56 +195,56 @@ LOO_subjects = generate_LOO_subjects()
 variables = []
 network_titles = ['No Tuning', 'LOO Training', '4000 SE Priors', '6000 SE Priors', '8000 SE Priors', '10000 SE Priors', '4000 SE Transfer', '6000 SE Transfer', '8000 SE Transfer', '10000 SE Transfer']
 Basics = [True]
-Basics.extend([False] * (len(network_titles) -1))
+Basics.extend([False] * (len(network_titles) - 1))
 LOO = [False, True, False, False, False, False, True, True, True, True]
 Priors = [False, False, True, True, True, True, False, False, False, False]
 Network_Directories = []
 
-network_directories = [None,
-    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final'),
-    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_4000_SEs_binary'),
-    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_6000_SEs_binary'),
-    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_8000_SEs_binary'),
-    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_10000_SEs_binary'),
-    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_4000_SEs_binary'),
-    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_6000_SEs_binary'),
-    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_8000_SEs_binary'),
-    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_10000_SEs_binary')
-]
+network_directories = [None]#,
+#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final'),
+#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_4000_SEs_binary'),
+#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_6000_SEs_binary'),
+#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_8000_SEs_binary'),
+#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_10000_SEs_binary'),
+#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_4000_SEs_binary'),
+#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_6000_SEs_binary'),
+#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_8000_SEs_binary'),
+#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_10000_SEs_binary')
+# ]
 
-# stats_50 = []
-# stats_th = []
-# stats_ROC_aucs = []
-#
-# for i in range(len(network_directories)):
-#
-#     variables = test_network(data, LOO_subjects, Basic = Basics[i], LOO = LOO[i], Priors = Priors[i], network_load_directory = network_directories[i])
-#
-#     mean_50 = np.mean(variables[0], axis = 0)
-#     stdev_50 = np.std(variables[0], axis = 0)
-#
-#     mean_th = np.mean(variables[1], axis = 0)
-#     stdev_th = np.std(variables[1], axis = 0)
-#
-#     stats_50.append([f"{mean:.2f} ({stdev:.2f})" for mean, stdev in zip(mean_50, stdev_50)])
-#
-#     stats_th.append([f"{mean:.2f} ({stdev:.2f})" for mean, stdev in zip(mean_th, stdev_th)])
-#
-#     stats_ROC_aucs.append(f"{np.mean(variables[3]):.2f} ({np.std(variables[3]):.2f})")
-#
-# def write_to_csv(filename, titles, running_means):
-#     with open(filename, mode='w', newline='') as file:
-#         writer = csv.writer(file)
-#         for title, results in zip(titles, running_means):
-#             writer.writerow([title] + results)
-#
-# # Write the running means to CSV files
-# write_to_csv('stats_50.csv', network_titles, stats_50)
-# write_to_csv('stats_th.csv', network_titles, stats_th)
-#
-#
-# with open('ROC_stats.csv', mode='w', newline='') as file:
-#     csv.writer(file).writerows([[element] for element in stats_ROC_aucs])
+stats_50 = []
+stats_th = []
+stats_ROC_aucs = []
+
+for i in range(len(network_directories)):
+
+    variables = test_network(data, LOO_subjects, Basic = Basics[i], LOO = LOO[i], Priors = Priors[i], network_load_directory = network_directories[i])
+
+    mean_50 = np.mean(variables[0], axis = 0)
+    stdev_50 = np.std(variables[0], axis = 0)
+
+    mean_th = np.mean(variables[1], axis = 0)
+    stdev_th = np.std(variables[1], axis = 0)
+
+    stats_50.append([f"{mean:.2f} ({stdev:.2f})" for mean, stdev in zip(mean_50, stdev_50)])
+
+    stats_th.append([f"{mean:.2f} ({stdev:.2f})" for mean, stdev in zip(mean_th, stdev_th)])
+
+    stats_ROC_aucs.append(f"{np.mean(variables[3]):.2f} ({np.std(variables[3]):.2f})")
+
+def write_to_csv(filename, titles, running_means):
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        for title, results in zip(titles, running_means):
+            writer.writerow([title] + results)
+
+# Write the running means to CSV files
+write_to_csv('stats_50.csv', network_titles, stats_50)
+write_to_csv('stats_th.csv', network_titles, stats_th)
+
+
+with open('ROC_stats.csv', mode='w', newline='') as file:
+    csv.writer(file).writerows([[element] for element in stats_ROC_aucs])
 
 
 #%%
@@ -243,6 +255,7 @@ for index, i in zip(indices_of_interest, range(len(indices_of_interest))):
     variables.append(test_network(data, LOO_subjects, Basic = Basics[index], LOO = LOO[index], Priors = Priors[index], network_load_directory = network_directories[index], fig = fig, subplot_dimensions = (2,2), i = i))
 
 variables[-1][4].tight_layout()
+variables[-1][4].savefig('ROCs.png')
 variables[-1][4].show()
 
 
@@ -256,4 +269,3 @@ variables[-1][4].show()
 # variables.append(test_network(data, LOO_subjects, LOO = True, fig = variables[2][4], subplot_dimensions = (2,2), i = 3, network_load_directory = network_directories[2]))
 # variables[-1][4].tight_layout()
 # variables[-1][4].show()
-
