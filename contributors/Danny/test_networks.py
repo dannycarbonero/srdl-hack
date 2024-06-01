@@ -200,17 +200,17 @@ LOO = [False, True, False, False, False, False, True, True, True, True]
 Priors = [False, False, True, True, True, True, False, False, False, False]
 Network_Directories = []
 
-network_directories = [None]#,
-#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final'),
-#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_4000_SEs_binary'),
-#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_6000_SEs_binary'),
-#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_8000_SEs_binary'),
-#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_10000_SEs_binary'),
-#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_4000_SEs_binary'),
-#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_6000_SEs_binary'),
-#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_8000_SEs_binary'),
-#     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_10000_SEs_binary')
-# ]
+network_directories = [None,
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_LOO_128_epochs_binary_final'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_4000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_6000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_8000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_tuned_priors_128_epochs_10000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_4000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_6000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_8000_SEs_binary'),
+    get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_10000_SEs_binary')
+]
 
 stats_50 = []
 stats_th = []
