@@ -173,22 +173,22 @@ def test_network(data, LOO_subjects, network_load_directory = None, Basic = Fals
             ax_roc.legend(['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'Combined'])
         if i == 0:
             ax_roc.set_title('No tuning')
-            ax_roc.text(-0.1, 1.1, 'A)', transform=ax_roc.transAxes, fontsize=14, fontweight='bold', va='top',
+            ax_roc.text(-0.1, 1.1, 'A', transform=ax_roc.transAxes, fontsize=14, fontweight='bold', va='top',
                         ha='right')
 
         elif i == 1:
             ax_roc.set_title(r'$\it{In\ vivo}$ data alone')
-            ax_roc.text(-0.1, 1.1, 'B)', transform=ax_roc.transAxes, fontsize=14, fontweight='bold', va='top',
+            ax_roc.text(-0.1, 1.1, 'B', transform=ax_roc.transAxes, fontsize=14, fontweight='bold', va='top',
                         ha='right')
 
         elif i == 2:
             ax_roc.set_title('Synthetic Data Alone')
-            ax_roc.text(-0.1, 1.1, 'C)', transform=ax_roc.transAxes, fontsize=14, fontweight='bold', va='top',
+            ax_roc.text(-0.1, 1.1, 'C', transform=ax_roc.transAxes, fontsize=14, fontweight='bold', va='top',
                         ha='right')
 
         elif i == 3:
             ax_roc.set_title(r'Synthetic + $\it{in\ vivo}$ data')
-            ax_roc.text(-0.1, 1.1, 'D)', transform=ax_roc.transAxes, fontsize=14, fontweight='bold', va='top',
+            ax_roc.text(-0.1, 1.1, 'D', transform=ax_roc.transAxes, fontsize=14, fontweight='bold', va='top',
                         ha='right')
 
     return statistics_50, statistics_th, ROC_statistics, ROC_aucs, fig
