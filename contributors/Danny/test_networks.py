@@ -165,18 +165,31 @@ def test_network(data, LOO_subjects, network_load_directory = None, Basic = Fals
         # ax_roc.scatter(operating_point_cum[0], operating_point_cum[1], color='r', s = 65)
         ax_roc.set_xlabel('False Positive Rate', fontsize=14)
         ax_roc.set_ylabel('True Positive Rate', fontsize=14)
+        ax_roc.grid(True, which='both', linestyle='--', linewidth=0.5)
         ax_roc.spines[['right', 'top']].set_visible(False)
+
         if i+1 == 0:
             ax_roc.legend({})
             ax_roc.legend(['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'Combined'])
         if i == 0:
             ax_roc.set_title('No tuning')
+            ax_roc.text(-0.1, 1.1, 'A)', transform=ax_roc.transAxes, fontsize=14, fontweight='bold', va='top',
+                        ha='right')
+
         elif i == 1:
-            ax_roc.set_title(r'$\it{In\ vivo}$ data')
+            ax_roc.set_title(r'$\it{In\ vivo}$ data alone')
+            ax_roc.text(-0.1, 1.1, 'B)', transform=ax_roc.transAxes, fontsize=14, fontweight='bold', va='top',
+                        ha='right')
+
         elif i == 2:
             ax_roc.set_title('Synthetic Data Alone')
+            ax_roc.text(-0.1, 1.1, 'C)', transform=ax_roc.transAxes, fontsize=14, fontweight='bold', va='top',
+                        ha='right')
+
         elif i == 3:
             ax_roc.set_title(r'Synthetic + $\it{in\ vivo}$ data')
+            ax_roc.text(-0.1, 1.1, 'D)', transform=ax_roc.transAxes, fontsize=14, fontweight='bold', va='top',
+                        ha='right')
 
     return statistics_50, statistics_th, ROC_statistics, ROC_aucs, fig
 
@@ -212,39 +225,39 @@ network_directories = [None,
     get_parent_path('data', subdirectory='Spike Ripples/silver/RippleNet_transfer_LOO_128_epochs_10000_SEs_binary')
 ]
 
-stats_50 = []
-stats_th = []
-stats_ROC_aucs = []
-
-for i in range(len(network_directories)):
-
-    variables = test_network(data, LOO_subjects, Basic = Basics[i], LOO = LOO[i], Priors = Priors[i], network_load_directory = network_directories[i])
-
-    mean_50 = np.mean(variables[0], axis = 0)
-    stdev_50 = np.std(variables[0], axis = 0)
-
-    mean_th = np.mean(variables[1], axis = 0)
-    stdev_th = np.std(variables[1], axis = 0)
-
-    stats_50.append([f"{mean:.2f} ({stdev:.2f})" for mean, stdev in zip(mean_50, stdev_50)])
-
-    stats_th.append([f"{mean:.2f} ({stdev:.2f})" for mean, stdev in zip(mean_th, stdev_th)])
-
-    stats_ROC_aucs.append(f"{np.mean(variables[3]):.2f} ({np.std(variables[3]):.2f})")
-
-def write_to_csv(filename, titles, running_means):
-    with open(filename, mode='w', newline='') as file:
-        writer = csv.writer(file)
-        for title, results in zip(titles, running_means):
-            writer.writerow([title] + results)
-
-# Write the running means to CSV files
-write_to_csv('stats_50.csv', network_titles, stats_50)
-write_to_csv('stats_th.csv', network_titles, stats_th)
-
-
-with open('ROC_stats.csv', mode='w', newline='') as file:
-    csv.writer(file).writerows([[element] for element in stats_ROC_aucs])
+# stats_50 = []
+# stats_th = []
+# stats_ROC_aucs = []
+#
+# for i in range(len(network_directories)):
+#
+#     variables = test_network(data, LOO_subjects, Basic = Basics[i], LOO = LOO[i], Priors = Priors[i], network_load_directory = network_directories[i])
+#
+#     mean_50 = np.mean(variables[0], axis = 0)
+#     stdev_50 = np.std(variables[0], axis = 0)
+#
+#     mean_th = np.mean(variables[1], axis = 0)
+#     stdev_th = np.std(variables[1], axis = 0)
+#
+#     stats_50.append([f"{mean:.2f} ({stdev:.2f})" for mean, stdev in zip(mean_50, stdev_50)])
+#
+#     stats_th.append([f"{mean:.2f} ({stdev:.2f})" for mean, stdev in zip(mean_th, stdev_th)])
+#
+#     stats_ROC_aucs.append(f"{np.mean(variables[3]):.2f} ({np.std(variables[3]):.2f})")
+#
+# def write_to_csv(filename, titles, running_means):
+#     with open(filename, mode='w', newline='') as file:
+#         writer = csv.writer(file)
+#         for title, results in zip(titles, running_means):
+#             writer.writerow([title] + results)
+#
+# # Write the running means to CSV files
+# write_to_csv('stats_50.csv', network_titles, stats_50)
+# write_to_csv('stats_th.csv', network_titles, stats_th)
+#
+#
+# with open('ROC_stats.csv', mode='w', newline='') as file:
+#     csv.writer(file).writerows([[element] for element in stats_ROC_aucs])
 
 
 #%%
