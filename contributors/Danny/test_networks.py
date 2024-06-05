@@ -261,14 +261,14 @@ network_directories = [None,
 
 
 #%%
-fig = plt.figure(figsize = (12,8))
+fig = plt.figure(figsize = (12,8), dpi = 600)
 variables = []
 indices_of_interest = [0,1,5,9]
 for index, i in zip(indices_of_interest, range(len(indices_of_interest))):
     variables.append(test_network(data, LOO_subjects, Basic = Basics[index], LOO = LOO[index], Priors = Priors[index], network_load_directory = network_directories[index], fig = fig, subplot_dimensions = (2,2), i = i))
 
 variables[-1][4].tight_layout()
-variables[-1][4].savefig('ROCs.png')
+variables[-1][4].savefig('Figure 6.pdf')
 variables[-1][4].show()
 
 
