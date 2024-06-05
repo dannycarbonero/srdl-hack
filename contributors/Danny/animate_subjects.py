@@ -62,19 +62,24 @@ for patch in ax.patches:
     if label < len(labels):  # Ensure index is within bounds
         subject_patches[labels[int(np.ceil(label))]].append(patch)
 
-
 # Animation function
 def update(frame):
-    current_label = labels[frame + 1]  # Ensure it starts from S1 (index 1)
-    for label in labels:
-        for patch in subject_patches[label]:
-            if label == current_label:
+    if frame == 0:
+        # Show all bars without fading for the first frame
+        for label in labels:
+            for patch in subject_patches[label]:
                 patch.set_alpha(1.0)
-            else:
-                patch.set_alpha(0.3)
+    else:
+        current_label = labels[frame]  # Use frame directly to index labels
+        for label in labels:
+            for patch in subject_patches[label]:
+                if label == current_label:
+                    patch.set_alpha(1.0)
+                else:
+                    patch.set_alpha(0.3)
 
 # Create animation
-ani = FuncAnimation(fig, update, frames=np.arange(0, 6), interval=1000, repeat=True)
+ani = FuncAnimation(fig, update, frames=np.arange(0, 7), interval=1000, repeat=True)
 
 # Save animation
 ani.save('subject_counts_animation.gif', writer='pillow')
