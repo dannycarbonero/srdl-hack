@@ -1,50 +1,51 @@
-from directory_handling import get_parent_path
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FixedLocator
 import seaborn as sns
+from matplotlib.animation import FuncAnimation
+
+from directory_handling import get_parent_path
 from utilities import generate_LOO_subjects
 
-#%%
+# Load data
 data_directory = get_parent_path('data', 'Spike Ripples/silver')
 with open(data_directory + 'silver_data_frame.pkl', 'rb') as file:
     data = pickle.load(file)
 
+# Unique subjects
 unique_subjects = data['subject'].nunique()
 print("Unique subjects:", unique_subjects)
 
+# Generate LOO subjects and y_counts
 y_counts = []
 LOO_subjects = generate_LOO_subjects()
 for subject in LOO_subjects:
     y_counts.append(len(data[(data['subject'] == subject) & (data['classification'] == 'y')]))
 
 
-
-#%%
+# bk_frame and working_bk
 bk_frame = data[data['classification'] == 'bk']
 bk_counts = len(bk_frame)
 working_bk = []
 for subject in LOO_subjects:
     working_bk.append(len(bk_frame[bk_frame['subject'] != subject]))
 
-
-#%%
+# Update classifications
 data['classification'] = data['classification'].replace('bk', 'background')
 data['classification'] = data['classification'].replace('y', 'spike ripple')
 data['classification'] = data['classification'].replace('n', 'spike')
 
-
-#%%
+# Update subjects
 data['subject'] = data['subject'].apply(lambda x: x if x in LOO_subjects else 'Others Agg.')
 LOO_subjects = [subject[-3:] for subject in LOO_subjects]
 labels = ['S0', 'S1', 'S2', 'S3', 'S4', 'S5', 'S6']
 
+# Plot setup
 plt.rcParams['font.family'] = 'Arial'
 plt.rcParams.update({'font.size': 14})
-fig = plt.figure(dpi = 600)
-ax = fig.add_subplot(111)
-ax = sns.histplot(data = data, x = 'subject', hue = 'classification', multiple = 'stack')
+fig, ax = plt.subplots(dpi=300)
+hist = sns.histplot(data=data, x='subject', hue='classification', multiple='stack', ax=ax)
 ax.tick_params(axis='x', rotation=45)
 legend_entries = ['Others Agg.']
 legend_entries.extend(labels)
@@ -53,32 +54,29 @@ ax.spines[['right', 'top']].set_visible(False)
 ax.set_xlabel('Subject')
 ax.yaxis.set_major_locator(FixedLocator([0, 350, 1100]))
 fig.tight_layout()
-# fig.savefig('subject_counts.png')
-# fig.savefig('subject_counts.svg')
-# fig.savefig('subject_counts.tif')
-fig.savefig('Figure 3.pdf')
-fig.show()
 
-#%%
-# LOO_subjects = generate_LOO_subjects()
-# LOO_subjects.insert(0, 'Others Agg.')
-# value_counts = []
-# for subject in LOO_subjects:
-#     value_counts.append(data[data['subject'] == subject]['classification'].value_counts())
-#
-# # number of ripples
-# ripple_counts = []
-# for i in range(1,len(LOO_subjects)):
-#     ripple_counts.append(value_counts[i]['spike ripple'])
-# print(f"The minimum value is {np.min(ripple_counts)}, the maximum value is {np.max(ripple_counts)}, and the mean is {np.mean(ripple_counts):.2f}.")
-#
-# # ripples per LOO set
-# ripple_counts_all = []
-# for i in range(len(LOO_subjects)):
-#     ripple_counts_all.append(value_counts[i]['spike ripple'])
-# LOO_sets = [sum(ripple_counts_all) - ripple_counts_all[i] for i in range(1,len(ripple_counts_all))]
-# print(f"The minimum value is {np.min(LOO_sets)}, the maximum value is {np.max(LOO_sets)}, and the mean is {np.mean(LOO_sets):.2f}.")
-#
-# print(f"The total number of background events were {len(data[data['classification'] == 'background']):.2f}.")
-#
-# print(value_counts[0])
+# Create a mapping from subjects to patches
+subject_patches = {label: [] for label in labels}
+for patch in ax.patches:
+    label = patch.get_x()
+    if label < len(labels):  # Ensure index is within bounds
+        subject_patches[labels[int(np.ceil(label))]].append(patch)
+
+
+# Animation function
+def update(frame):
+    current_label = labels[frame + 1]  # Ensure it starts from S1 (index 1)
+    for label in labels:
+        for patch in subject_patches[label]:
+            if label == current_label:
+                patch.set_alpha(1.0)
+            else:
+                patch.set_alpha(0.3)
+
+# Create animation
+ani = FuncAnimation(fig, update, frames=np.arange(0, 6), interval=1000, repeat=True)
+
+# Save animation
+ani.save('subject_counts_animation.gif', writer='pillow')
+
+plt.show()
