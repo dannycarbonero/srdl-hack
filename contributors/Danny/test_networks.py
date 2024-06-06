@@ -268,7 +268,8 @@ for index, i in zip(indices_of_interest, range(len(indices_of_interest))):
     variables.append(test_network(data, LOO_subjects, Basic = Basics[index], LOO = LOO[index], Priors = Priors[index], network_load_directory = network_directories[index], fig = fig, subplot_dimensions = (2,2), i = i))
 
 variables[-1][4].tight_layout()
-variables[-1][4].savefig('Figure 6.pdf')
+# variables[-1][4].savefig('figures/ROCs.png')
+variables[-1][4].savefig('figures/Figure 6.pdf')
 variables[-1][4].show()
 
 
