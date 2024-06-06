@@ -55,7 +55,6 @@ ax.yaxis.set_major_locator(FixedLocator([0, 350, 1100]))
 fig.tight_layout()
 # fig.savefig('figures/subject_counts.png')
 # fig.savefig('figures/subject_counts.svg')
-# fig.savefig('figures/subject_counts.tif')
 fig.savefig('figures/Figure 3.pdf')
 fig.show()
 
